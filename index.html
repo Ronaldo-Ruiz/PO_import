@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CDM Cutting Orders</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,Helvetica,sans-serif;background:#eef3f9;color:#0f172a}
+.page{padding:24px}
+.header{background:linear-gradient(135deg,#2563eb,#1e40af);color:white;border-radius:28px;padding:26px 28px;display:flex;justify-content:space-between;align-items:center;gap:20px;box-shadow:0 12px 30px rgba(15,23,42,.18)}
+.header h1{margin:0;font-size:44px;line-height:1}
+.header p{margin:10px 0 0;font-size:20px;opacity:.9}
+.header-actions{display:flex;gap:14px;flex-wrap:wrap}
+.card{margin-top:24px;background:white;border:1px solid #d7e1ef;border-radius:26px;padding:24px;box-shadow:0 14px 34px rgba(15,23,42,.08)}
+.card h2{margin:0 0 18px;font-size:32px}
+label{display:block;font-weight:800;font-size:18px;margin:14px 0 8px}
+input[type=file],input[type=email],input[type=text]{width:100%;border:1px solid #cbd5e1;border-radius:16px;padding:14px 18px;font-size:22px;background:white}
+button{border:0;border-radius:16px;padding:16px 22px;font-size:20px;font-weight:900;cursor:pointer}
+.btn-primary{background:#2563eb;color:white}.btn-dark{background:#111827;color:white}.btn-light{background:#e8eef7;color:#1e40af}
+.message{margin-top:16px;font-weight:900;font-size:18px}.message.error{color:#dc2626}.message.ok{color:#16a34a}
+.cards{display:grid;grid-template-columns:repeat(4,minmax(220px,1fr));gap:14px;margin-bottom:16px}
+.info-box{border:1px solid #d7e1ef;background:#f8fafc;border-radius:20px;padding:18px}.info-label{font-size:16px;font-weight:900;color:#64748b}.info-value{margin-top:8px;font-size:30px;font-weight:900}
+.table-wrap{overflow:auto;border:1px solid #d7e1ef;border-radius:18px}
+table{width:100%;border-collapse:collapse;min-width:1150px}
+th,td{padding:14px 16px;border-bottom:1px solid #e2e8f0;text-align:left;font-size:18px}
+th{background:#f8fafc;font-weight:900}tr:last-child td{border-bottom:0}
+.badge{display:inline-block;border-radius:999px;padding:6px 12px;font-weight:900;text-transform:uppercase}
+.badge.black{background:#000;color:#fff}.badge.grey{background:#d1d5db;color:#000}
+.material-black{color:#111827;font-weight:800}.material-grey{color:#4b5563;font-weight:800}
+.hidden{display:none!important}
+@media(max-width:1000px){.header{flex-direction:column;align-items:flex-start}.cards{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="header">
+    <div>
+      <h1>CDM Cutting Orders</h1>
+      <p>Import Schnaidt PDF orders and send them to the saw panel</p>
+    </div>
+    <div class="header-actions">
+      <button class="btn-dark" onclick="openSawPanel()">Open saw panel</button>
+      <button class="btn-light" onclick="loadRecentOrders()">Refresh</button>
+    </div>
+  </div>
+
+  <section class="card">
+    <h2>Import new PO PDF</h2>
+    <label>PDF file</label>
+    <input id="pdfFile" type="file" accept="application/pdf">
+    <label>User / email</label>
+    <input id="userEmail" type="email" placeholder="your.name@company.com">
+    <div style="margin-top:18px;">
+      <button class="btn-primary" onclick="importPdf()">Import PDF</button>
+    </div>
+    <div id="importMessage" class="message"></div>
+  </section>
+
+  <section id="importedSection" class="card hidden">
+    <h2>Imported order</h2>
+    <div class="cards">
+      <div class="info-box"><div class="info-label">Cutting order</div><div id="impOrder" class="info-value">-</div></div>
+      <div class="info-box"><div class="info-label">PO</div><div id="impPo" class="info-value">-</div></div>
+      <div class="info-box"><div class="info-label">Items</div><div id="impItems" class="info-value">-</div></div>
+      <div class="info-box"><div class="info-label">Pieces</div><div id="impPieces" class="info-value">-</div></div>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Item</th><th>Order</th><th>PO</th><th>Material</th><th>Color</th><th>Thickness</th><th>Measure</th><th>Qty</th>
+          </tr>
+        </thead>
+        <tbody id="importedItemsBody"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Recent imported cutting orders</h2>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Cutting order</th><th>PO</th><th>Status</th><th>Items</th><th>Pieces</th><th>Created at</th><th>Created by</th><th>PDF</th>
+          </tr>
+        </thead>
+        <tbody id="recentOrdersBody"></tbody>
+      </table>
+    </div>
+  </section>
+</div>
+
+<script>
+const API_URL = "https://script.google.com/macros/s/AKfycbx6O29a_NJC7s79krRhpivH745asbKCewJsa0r8-a8SQ3YWeWT8tCBHixAXjUfJiUci/exec";
+
+async function apiPost(payload){
+  const res = await fetch(API_URL,{method:"POST",body:JSON.stringify(payload)});
+  const raw = await res.text();
+  try{return JSON.parse(raw);}
+  catch(error){throw new Error("Server response was not valid JSON: " + raw.slice(0,200));}
+}
+
+function escapeHtml(text){
+  return String(text||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;");
+}
+
+function formatDate(value){
+  if(!value)return "";
+  const d = new Date(value);
+  if(isNaN(d))return String(value||"");
+  return d.toLocaleString("pt-PT");
+}
+
+function setMessage(text,type){
+  const el=document.getElementById("importMessage");
+  el.textContent=text||"";
+  el.className="message "+(type||"");
+}
+
+/************************************************************
+ * CDM COLOR SAFETY
+ * Regra absoluta:
+ * 68940 / 68.940 = grey
+ * 68910 / 68.910 = black
+ ************************************************************/
+function getCdmColor(item){
+  const material=String(item.Material||item.material||"");
+  const serie=String(item.Serie||item.serie||"");
+  const cor=String(item.Cor||item.cor||"");
+  const full=(material+" "+serie+" "+cor).toLowerCase();
+
+  if(full.includes("68940") || full.includes("68.940") || full.includes("68,940")) return "grey";
+  if(full.includes("68910") || full.includes("68.910") || full.includes("68,910")) return "black";
+  if(full.includes("grey") || full.includes("gray")) return "grey";
+  if(full.includes("black")) return "black";
+  return "";
+}
+
+function getCdmSerie(color){
+  if(color==="grey") return "68.940";
+  if(color==="black") return "68.910N";
+  return "";
+}
+
+function getSafeMaterial(item){
+  const color=getCdmColor(item);
+  const serie=getCdmSerie(color);
+  const esp=item.Espessura||item.espessura||"";
+  if(serie && color) return "CDM ESD "+serie+" "+color+" "+esp+" mm";
+  return item.Material||item.material||"";
+}
+
+function fileToBase64(file){
+  return new Promise((resolve,reject)=>{
+    const reader=new FileReader();
+    reader.onload=()=>resolve(reader.result);
+    reader.onerror=reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+async function importPdf(){
+  try{
+    const fileInput=document.getElementById("pdfFile");
+    const email=document.getElementById("userEmail").value.trim();
+
+    if(!fileInput.files.length){
+      setMessage("Select a PDF file first.","error");
+      return;
+    }
+
+    const file=fileInput.files[0];
+    setMessage("Importing PDF...","");
+
+    const base64=await fileToBase64(file);
+
+    const data=await apiPost({
+      action:"importarPedidoCdmPdf",
+      filename:file.name,
+      base64:base64,
+      userEmail:email
+    });
+
+    if(!data.ok) throw new Error(data.message || "Import error.");
+
+    setMessage("PDF imported successfully.","ok");
+    renderImportedOrder(data.pedido,data.itens||[]);
+    loadRecentOrders();
+
+  }catch(error){
+    setMessage("Error: "+error.message,"error");
+  }
+}
+
+function renderImportedOrder(pedido,itens){
+  document.getElementById("importedSection").classList.remove("hidden");
+
+  document.getElementById("impOrder").textContent=pedido.OrdemCorte||pedido.ordemCorte||"-";
+  document.getElementById("impPo").textContent=pedido.NumeroPO||pedido.numeroPO||"-";
+  document.getElementById("impItems").textContent=itens.length;
+
+  const totalPieces=itens.reduce((sum,item)=>sum+Number(item.Quantidade||item.quantidade||0),0);
+  document.getElementById("impPieces").textContent=totalPieces;
+
+  const body=document.getElementById("importedItemsBody");
+  body.innerHTML="";
+
+  itens.slice().sort((a,b)=>{
+    const ai=Number(String(a.ItemCliente||a.itemCliente||"").replace(/\D/g,""))||999999;
+    const bi=Number(String(b.ItemCliente||b.itemCliente||"").replace(/\D/g,""))||999999;
+    return ai-bi;
+  }).forEach(item=>{
+    const color=getCdmColor(item);
+    const safeMaterial=getSafeMaterial(item);
+    const row=document.createElement("tr");
+
+    row.innerHTML = `
+      <td>${escapeHtml(item.ItemCliente||item.itemCliente||"")}</td>
+      <td>${escapeHtml(item.OrdemCorte||item.ordemCorte||pedido.OrdemCorte||"")}</td>
+      <td>${escapeHtml(item.NumeroPO||item.numeroPO||pedido.NumeroPO||"")}</td>
+      <td class="${color==="grey"?"material-grey":"material-black"}">${escapeHtml(safeMaterial)}</td>
+      <td><span class="badge ${escapeHtml(color)}">${escapeHtml(color)}</span></td>
+      <td>${escapeHtml(item.Espessura||item.espessura||"")} mm</td>
+      <td>${escapeHtml(item.Largura||item.largura||"")} x ${escapeHtml(item.Comprimento||item.comprimento||"")}</td>
+      <td>${escapeHtml(item.Quantidade||item.quantidade||"")}</td>
+    `;
+
+    body.appendChild(row);
+  });
+}
+
+async function loadRecentOrders(){
+  try{
+    const data=await apiPost({action:"getPedidosCorteCdmRecentes",limit:30});
+    if(!data.ok) throw new Error(data.message || "Error loading recent orders.");
+    renderRecentOrders(data.items||[]);
+  }catch(error){
+    console.error(error);
+  }
+}
+
+function renderRecentOrders(items){
+  const body=document.getElementById("recentOrdersBody");
+  body.innerHTML="";
+
+  if(!items.length){
+    body.innerHTML='<tr><td colspan="8">No imported orders found.</td></tr>';
+    return;
+  }
+
+  items.forEach(order=>{
+    const row=document.createElement("tr");
+    const pdf=order.ArquivoPDF ? `<a href="${escapeHtml(order.ArquivoPDF)}" target="_blank">Open</a>` : "";
+
+    row.innerHTML = `
+      <td>${escapeHtml(order.OrdemCorte||"")}</td>
+      <td>${escapeHtml(order.NumeroPO||"")}</td>
+      <td>${escapeHtml(order.Status||"")}</td>
+      <td>${escapeHtml(order.TotalItens||"")}</td>
+      <td>${escapeHtml(order.TotalPecas||"")}</td>
+      <td>${escapeHtml(formatDate(order.CriadoEm))}</td>
+      <td>${escapeHtml(order.CriadoPor||"")}</td>
+      <td>${pdf}</td>
+    `;
+    body.appendChild(row);
+  });
+}
+
+function openSawPanel(){
+  window.open("painel_cdm_com_encerrados.html","_blank");
+}
+
+window.addEventListener("load",()=>loadRecentOrders());
+</script>
+</body>
+</html>
