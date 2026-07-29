@@ -2,412 +2,274 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CDM Cutting Orders v26 Preview — Fixed API URL</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+<title>CDM Cutting Control v46 — Item correto e filtro de cortados</title>
+
 <style>
-*{box-sizing:border-box}
-body{margin:0;font-family:Arial,Helvetica,sans-serif;background:#eef3f9;color:#0f172a}
-.page{padding:24px}
-.header{background:linear-gradient(135deg,#2563eb,#1e40af);color:white;border-radius:28px;padding:26px 28px;display:flex;justify-content:space-between;align-items:center;gap:20px;box-shadow:0 12px 30px rgba(15,23,42,.18)}
-.header h1{margin:0;font-size:44px;line-height:1}
-.header p{margin:10px 0 0;font-size:20px;opacity:.9}
-.header-actions{display:flex;gap:14px;flex-wrap:wrap}
-.card{margin-top:24px;background:white;border:1px solid #d7e1ef;border-radius:26px;padding:24px;box-shadow:0 14px 34px rgba(15,23,42,.08)}
-.card h2{margin:0 0 18px;font-size:32px}
-label{display:block;font-weight:800;font-size:18px;margin:14px 0 8px}
-input[type=file],input[type=email],input[type=text]{width:100%;border:1px solid #cbd5e1;border-radius:16px;padding:14px 18px;font-size:22px;background:white}
-button{border:0;border-radius:16px;padding:16px 22px;font-size:20px;font-weight:900;cursor:pointer}
-.btn-primary{background:#2563eb;color:white}.btn-dark{background:#111827;color:white}.btn-light{background:#e8eef7;color:#1e40af}
-.message{margin-top:16px;font-weight:900;font-size:18px}.message.error{color:#dc2626}.message.ok{color:#16a34a}.message.warning{color:#92400e}
-.cards{display:grid;grid-template-columns:repeat(4,minmax(220px,1fr));gap:14px;margin-bottom:16px}
-.info-box{border:1px solid #d7e1ef;background:#f8fafc;border-radius:20px;padding:18px}.info-label{font-size:16px;font-weight:900;color:#64748b}.info-value{margin-top:8px;font-size:30px;font-weight:900}
-.table-wrap{overflow:auto;border:1px solid #d7e1ef;border-radius:18px}
-table{width:100%;border-collapse:collapse;min-width:1150px}
-th,td{padding:14px 16px;border-bottom:1px solid #e2e8f0;text-align:left;font-size:18px}
-th{background:#f8fafc;font-weight:900}tr:last-child td{border-bottom:0}
-.badge{display:inline-block;border-radius:999px;padding:6px 12px;font-weight:900;text-transform:uppercase}
-.badge.black{background:#000;color:#fff}.badge.grey{background:#d1d5db;color:#000}
-.material-black{color:#111827;font-weight:800}.material-grey{color:#4b5563;font-weight:800}
-
-.material-alert-box{margin:0 0 18px;background:#ffedd5;border:4px solid #f97316;color:#7c2d12;border-radius:20px;padding:18px 20px;font-size:18px;font-weight:900;box-shadow:0 8px 22px rgba(249,115,22,.18)}
-.material-alert-box h3{margin:0 0 10px;font-size:25px}
-.material-alert-box ul{margin:8px 0 0;padding-left:24px}
-.row-material-alert{background:#fff7ed!important;outline:3px solid #fb923c;outline-offset:-3px}
-.badge.material-warning{background:#f97316;color:#fff}
-.badge.registered{background:#dcfce7;color:#166534}
-.alert-detail{font-size:14px;color:#9a3412;font-weight:900;margin-top:6px;line-height:1.3}
-.code-raw{font-family:Consolas,monospace;font-size:18px;font-weight:900}
-.order-material-alert{background:#fff7ed}
-
-.preview-toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:14px 0}
-.preview-summary{display:grid;grid-template-columns:repeat(4,minmax(170px,1fr));gap:12px;margin:14px 0}
-.preview-summary .info-value{font-size:25px}
-.preview-table{min-width:1500px}
-.preview-table th:first-child,.preview-table td:first-child{position:sticky;left:0;background:inherit;z-index:2}
-.preview-check{width:24px;height:24px;cursor:pointer}
-.material-choice{min-width:330px;border:2px solid #cbd5e1;border-radius:12px;padding:9px 10px;font-size:15px;background:#fff}
-.row-excluded{opacity:.48;background:#e5e7eb!important;text-decoration:line-through}
-.row-material-corrected{background:#eff6ff!important;outline:3px solid #3b82f6;outline-offset:-3px}
-.badge.manual{background:#dbeafe;color:#1d4ed8}
-.preview-footer{position:sticky;bottom:0;background:rgba(255,255,255,.97);border-top:2px solid #cbd5e1;margin:18px -24px -24px;padding:16px 24px;display:flex;justify-content:space-between;align-items:center;gap:14px;box-shadow:0 -8px 20px rgba(15,23,42,.08)}
-.preview-footer-actions{display:flex;gap:10px;flex-wrap:wrap}
-.preview-warning{background:#fff7ed;border:3px solid #f97316;color:#7c2d12;border-radius:18px;padding:16px;font-weight:900;margin:14px 0}
-@media(max-width:1000px){.preview-summary{grid-template-columns:1fr 1fr}.preview-footer{position:static;margin:18px 0 0}}
-
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;width:100%;height:100%;font-family:Arial,Helvetica,sans-serif;background:#101827;color:#fff}
+body{overflow:hidden}
+.app{height:100vh;display:flex;flex-direction:column;padding:14px;gap:12px}
 .hidden{display:none!important}
-@media(max-width:1000px){.header{flex-direction:column;align-items:flex-start}.cards{grid-template-columns:1fr 1fr}}
+.header{background:linear-gradient(135deg,#1f2937 0%,#111827 100%);border:2px solid #374151;border-radius:20px;padding:14px 18px;display:flex;justify-content:space-between;align-items:center;gap:14px;flex:0 0 auto}
+.title{font-size:34px;font-weight:900;letter-spacing:1px;line-height:1}
+.subtitle{font-size:16px;opacity:.82;margin-top:5px}
+.clock{font-size:22px;font-weight:900;text-align:right;white-space:nowrap}
+.mode-buttons{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;margin-top:8px}
+.btn{border:0;border-radius:14px;padding:12px 16px;font-size:18px;font-weight:900;cursor:pointer}
+.btn-dark{background:#374151;color:#fff}.btn-blue{background:#2563eb;color:#fff}
+.orders-screen,.list-screen,.po-screen,.closed-screen,.closed-detail-screen{flex:1 1 auto;min-height:0;display:flex;flex-direction:column;gap:12px}
+.section-title{font-size:30px;font-weight:900;color:#e5e7eb;flex:0 0 auto;display:flex;justify-content:space-between;align-items:center;gap:10px}
+.orders-grid{overflow:auto;display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:14px;padding-right:4px}
+.order-card{background:#f8fafc;color:#111827;border-radius:22px;padding:20px;border:4px solid #d1d5db;box-shadow:0 10px 22px rgba(0,0,0,.25);cursor:pointer}
+.order-card:hover{border-color:#60a5fa}
+.order-number{font-size:42px;font-weight:900;line-height:1;color:#1d4ed8}
+.order-po{font-size:22px;font-weight:800;margin-top:8px;color:#374151}
+.order-meta{font-size:22px;font-weight:900;margin-top:14px;color:#111827}
+.order-small{font-size:16px;margin-top:8px;color:#6b7280}
+.filters{background:#f8fafc;color:#111827;border-radius:18px;padding:12px;display:grid;grid-template-columns:1.2fr .8fr .8fr .9fr .9fr auto;gap:10px;align-items:end;flex:0 0 auto}
+.filters.po-filters{grid-template-columns:.8fr .8fr .9fr .9fr .9fr auto}
+.filters.closed-filters{grid-template-columns:1fr 1fr 1fr auto}
+.field label{display:block;font-size:12px;font-weight:900;color:#475569;margin-bottom:4px;text-transform:uppercase}
+.field input,.field select{width:100%;height:44px;border:2px solid #cbd5e1;border-radius:12px;padding:6px 10px;font-size:18px;font-weight:800;background:#fff;color:#111827}
+.summary{font-size:20px;font-weight:900;color:#e5e7eb;display:flex;justify-content:space-between;align-items:center;gap:10px;flex:0 0 auto}
+.po-top{flex:0 0 auto;display:flex;justify-content:space-between;align-items:center;gap:12px;background:#f8fafc;color:#111827;border-radius:18px;padding:12px 16px}
+.selected-order{font-size:36px;font-weight:900;color:#1d4ed8;line-height:1}
+.selected-info{font-size:18px;font-weight:800;color:#374151;margin-top:5px}
+.list{flex:1 1 auto;min-height:0;overflow:auto;display:flex;flex-direction:column;gap:9px;padding-right:4px}
+.cut-row{
+  display:grid;
+  grid-template-columns:minmax(62px,.52fr) minmax(205px,1fr) minmax(230px,1.14fr) minmax(100px,.62fr) minmax(190px,.92fr) minmax(125px,.58fr) minmax(135px,.66fr) minmax(178px,auto);
+  gap:8px 12px;
+  align-items:center;
+  border-radius:16px;
+  padding:11px 12px;
+  min-height:82px;
+  border:4px solid transparent;
+  flex:0 0 auto;
+  overflow:visible;
+}
+.cut-row.black{background:#000;color:#fff;border-color:#374151}
+.cut-row.grey{background:#d1d5db;color:#000;border-color:#9ca3af}
+.cut-item,.cut-order,.cut-material,.cut-thickness,.cut-measure,.cut-qty,.cut-date,.cut-buttons{min-width:0}
+.cut-item{font-size:28px;font-weight:900;line-height:1;color:#facc15;align-self:center}
+.cut-row.grey .cut-item{color:#92400e}
+.cut-order{font-size:22px;font-weight:900;line-height:1.08;align-self:center}
+.cut-small{display:block;font-size:14px;line-height:1.15;opacity:.78;margin-top:4px;white-space:normal;overflow-wrap:anywhere}
+.cut-material{font-size:24px;font-weight:900;text-transform:uppercase;line-height:1.08;align-self:center;overflow-wrap:anywhere}
+.cut-thickness{font-size:36px;font-weight:900;line-height:1;color:#ef4444;white-space:nowrap;align-self:center}
+.cut-row.grey .cut-thickness{color:#991b1b}
+.cut-measure{font-size:36px;font-weight:900;line-height:1;white-space:nowrap;align-self:center}
+.cut-qty{font-size:30px;font-weight:900;color:#22c55e;line-height:1;white-space:nowrap;align-self:center}
+.cut-row.grey .cut-qty{color:#166534}
+.cut-date{font-size:18px;font-weight:900;line-height:1.12;white-space:nowrap;align-self:center}
+.cut-buttons{display:flex;gap:7px;justify-content:flex-end;align-items:center;flex-wrap:nowrap;align-self:center}
+.cut-ok,.cut-label{font-size:18px;font-weight:900;padding:12px 14px;border:0;border-radius:14px;color:#fff;cursor:pointer;white-space:nowrap}
+.cut-ok{background:#16a34a}.cut-label{background:#2563eb}
+.status-done{background:#14532d;color:#fff;border-radius:12px;padding:10px;text-align:center;font-weight:900}
+.cut-row.done{opacity:.82;border-style:dashed}
+.cut-row.done.black{border-color:#22c55e}
+.cut-row.done.grey{border-color:#16a34a}
+.cut-done-label{background:#14532d;color:#fff;border-radius:12px;padding:10px;text-align:center;font-weight:900;white-space:nowrap}
+.cut-row.done .cut-item::after{content:" CORTADO";display:block;margin-top:6px;font-size:13px;color:#22c55e}
+.cut-row.grey.done .cut-item::after{color:#166534}
+.empty{flex:1;display:flex;align-items:center;justify-content:center;font-size:48px;font-weight:900;color:#4ade80;text-align:center}
+
+.material-global-warning{background:#7c2d12;color:#fff;border:4px solid #fb923c;border-radius:18px;padding:12px 16px;font-size:19px;font-weight:900;box-shadow:0 8px 24px rgba(249,115,22,.28);flex:0 0 auto}
+.order-card.material-alert{border-color:#f97316;background:#fff7ed;box-shadow:0 0 0 4px rgba(249,115,22,.22),0 10px 22px rgba(0,0,0,.25)}
+.order-alert{margin-top:10px;background:#f97316;color:#fff;border-radius:12px;padding:8px 10px;font-size:16px;font-weight:900}
+.cut-row.material-alert{
+  border-color:#f97316!important;
+  box-shadow:inset 0 0 0 3px #fdba74,0 0 18px rgba(249,115,22,.28);
+  grid-template-rows:auto auto;
+}
+.cut-row.unknown{background:#ffedd5;color:#431407;border-color:#f97316}
+.cut-material-alert-row{
+  grid-column:1 / -1;
+  display:grid;
+  grid-template-columns:auto 1fr;
+  align-items:start;
+  gap:10px;
+  margin-top:1px;
+  padding:8px 11px;
+  border-radius:10px;
+  background:#9a3412;
+  color:#fff;
+  font-size:13px;
+  line-height:1.25;
+  font-weight:800;
+  text-transform:none;
+  white-space:normal;
+  overflow-wrap:anywhere;
+}
+.cut-material-alert-title{font-weight:900;white-space:nowrap;color:#ffedd5}
+.cut-material-alert-detail{min-width:0}
+.cut-row.grey .cut-material-alert-row,.cut-row.unknown .cut-material-alert-row{background:#c2410c;color:#fff}
+.material-manual-badge{display:inline-block;margin-top:4px;border-radius:999px;padding:3px 7px;background:#2563eb;color:#fff;font-size:11px;font-weight:900}
+@media(max-width:1500px){
+  .cut-row{grid-template-columns:minmax(55px,.48fr) minmax(180px,.92fr) minmax(205px,1.05fr) minmax(92px,.55fr) minmax(165px,.85fr) minmax(110px,.52fr) minmax(120px,.58fr) minmax(162px,auto)}
+  .cut-item{font-size:25px}.cut-order{font-size:20px}.cut-material{font-size:21px}.cut-thickness,.cut-measure{font-size:32px}.cut-qty{font-size:27px}.cut-date{font-size:16px}.cut-ok,.cut-label{font-size:16px;padding:11px 12px}
+}
+
+.error{position:fixed;left:16px;right:16px;bottom:16px;background:#7f1d1d;color:#fff;padding:14px 18px;border-radius:14px;font-size:20px;font-weight:800;display:none}
 </style>
 </head>
+
 <body>
-<div class="page">
+<div class="app">
   <div class="header">
     <div>
-      <h1>CDM Cutting Orders</h1>
-      <p>Import Schnaidt PDF orders and send them to the saw panel</p>
+      <div class="title">CORTES CDM</div>
+      <div class="subtitle" id="subtitle">Pedidos em aberto</div>
     </div>
-    <div class="header-actions">
-      <button class="btn-dark" onclick="openSawPanel()">Open saw panel</button>
-      <button class="btn-light" onclick="loadRecentOrders()">Refresh</button>
-    </div>
-  </div>
-  <section class="card">
-    <h2>Import new PO PDF</h2>
-    <label>PDF file</label>
-    <input id="pdfFile" type="file" accept="application/pdf">
-    <label>User / email</label>
-    <input id="userEmail" type="email" placeholder="your.name@company.com">
-    <div style="margin-top:18px;">
-      <button class="btn-primary" onclick="preparePdfPreview()">Read PDF and review</button>
-    </div>
-    <div id="importMessage" class="message"></div>
-  </section>
-
-
-  <section id="previewSection" class="card hidden">
-    <h2>Review before import</h2>
-    <div class="cards">
-      <div class="info-box"><div class="info-label">Cutting order</div><div id="prevOrder" class="info-value">-</div></div>
-      <div class="info-box"><div class="info-label">PO</div><div id="prevPo" class="info-value">-</div></div>
-      <div class="info-box"><div class="info-label">PDF items</div><div id="prevPdfItems" class="info-value">-</div></div>
-      <div class="info-box"><div class="info-label">PDF pieces</div><div id="prevPdfPieces" class="info-value">-</div></div>
-    </div>
-
-    <div id="previewMaterialAlertBox" class="material-alert-box hidden"></div>
-
-    <div class="preview-toolbar">
-      <button class="btn-light" onclick="selectAllPreviewItems(true)">Select all</button>
-      <button class="btn-light" onclick="selectAllPreviewItems(false)">Deselect all</button>
-      <span style="font-weight:900;color:#475569">All items are selected by default. Uncheck only what must not be imported.</span>
-    </div>
-
-    <div class="preview-summary">
-      <div class="info-box"><div class="info-label">Selected items</div><div id="prevSelectedItems" class="info-value">0</div></div>
-      <div class="info-box"><div class="info-label">Selected pieces</div><div id="prevSelectedPieces" class="info-value">0</div></div>
-      <div class="info-box"><div class="info-label">Excluded items</div><div id="prevExcludedItems" class="info-value">0</div></div>
-      <div class="info-box"><div class="info-label">Unresolved warnings</div><div id="prevWarnings" class="info-value">0</div></div>
-    </div>
-
-    <div class="table-wrap">
-      <table class="preview-table">
-        <thead>
-          <tr>
-            <th>Import</th><th>Item</th><th>Order</th><th>PO</th><th>PDF code</th><th>Parsed material</th><th>Color</th><th>Thickness</th><th>Measure</th><th>Qty</th><th>Validation</th><th>Material decision</th>
-          </tr>
-        </thead>
-        <tbody id="previewItemsBody"></tbody>
-      </table>
-    </div>
-
-    <div class="preview-footer">
-      <div id="previewDecisionText" style="font-weight:900;color:#334155">Review all items before importing.</div>
-      <div class="preview-footer-actions">
-        <button class="btn-light" onclick="cancelCurrentPreview()">Cancel - do not import</button>
-        <button class="btn-primary" onclick="confirmCurrentPreview()">Confirm selected items</button>
+    <div>
+      <div class="clock" id="clock"></div>
+      <div class="mode-buttons">
+        <button class="btn btn-dark" onclick="showOrders()">POs em aberto</button>
+        <button class="btn btn-dark" onclick="showAllCuts()">Todos os cortes</button>
+        <button class="btn btn-dark" onclick="showClosedOrders()">Pedidos encerrados</button>
+        <button class="btn btn-blue" onclick="loadAll(true)">Atualizar</button>
       </div>
     </div>
+  </div>
+  <div id="materialGlobalWarning" class="material-global-warning hidden"></div>
+
+  <section id="ordersScreen" class="orders-screen">
+    <div class="section-title"><span>Pedidos com cortes em aberto</span><span id="ordersSummary"></span></div>
+    <div id="ordersGrid" class="orders-grid"></div>
+    <div id="ordersEmpty" class="empty hidden">SEM PEDIDOS EM ABERTO</div>
   </section>
 
-  <section id="importedSection" class="card hidden">
-    <h2>Imported order</h2>
-    <div class="cards">
-      <div class="info-box"><div class="info-label">Cutting order</div><div id="impOrder" class="info-value">-</div></div>
-      <div class="info-box"><div class="info-label">PO</div><div id="impPo" class="info-value">-</div></div>
-      <div class="info-box"><div class="info-label">Items</div><div id="impItems" class="info-value">-</div></div>
-      <div class="info-box"><div class="info-label">Pieces</div><div id="impPieces" class="info-value">-</div></div>
-    </div>
-    <div id="materialAlertBox" class="material-alert-box hidden"></div>
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th>Item</th><th>Order</th><th>PO</th><th>PDF code</th><th>Material</th><th>Color</th><th>Thickness</th><th>Cadastro</th><th>Measure</th><th>Qty</th>
-          </tr>
-        </thead>
-        <tbody id="importedItemsBody"></tbody>
-      </table>
-    </div>
+  <section id="listScreen" class="list-screen hidden">
+    <section class="filters">
+      <div class="field"><label>Pedido</label><select id="filterOrder" onchange="applyGlobalFilters()"><option value="">Todos</option></select></div>
+      <div class="field"><label>Cor</label><select id="filterColor" onchange="applyGlobalFilters()"><option value="">Todas</option><option value="black">Black</option><option value="grey">Grey</option></select></div>
+      <div class="field"><label>Espessura</label><select id="filterThickness" onchange="applyGlobalFilters()"><option value="">Todas</option></select></div>
+      <div class="field"><label>Data entrada</label><input id="filterDate" type="date" onchange="applyGlobalFilters()"></div>
+      <div class="field"><label>Ordenar por</label><select id="sortBy" onchange="applyGlobalFilters()"><option value="number">Número item</option><option value="order">Pedido</option><option value="date">Data entrada</option><option value="color">Cor</option><option value="thickness">Espessura</option><option value="measure">Medida</option><option value="qty">Quantidade</option></select></div>
+      <button class="btn btn-dark" onclick="clearGlobalFilters()">Limpar</button>
+    </section>
+    <div class="summary"><div id="summaryText">0 cortes em aberto</div><div id="summaryPieces">0 peças</div></div>
+    <div id="cutsList" class="list"></div>
+    <div id="listEmpty" class="empty hidden">SEM CORTES EM ABERTO</div>
   </section>
 
-  <section class="card">
-    <h2>Recent imported cutting orders</h2>
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th>Cutting order</th><th>PO</th><th>Status</th><th>Material</th><th>Items</th><th>Pieces</th><th>Created at</th><th>Created by</th><th>PDF</th>
-          </tr>
-        </thead>
-        <tbody id="recentOrdersBody"></tbody>
-      </table>
+  <section id="poScreen" class="po-screen hidden">
+    <div class="po-top">
+      <div><div class="selected-order" id="selectedOrder">SHC000000</div><div class="selected-info" id="selectedInfo">PO 0000000000</div></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <button id="toggleDoneItemsBtn" class="btn btn-blue" onclick="toggleDoneItemsInPo()">Mostrar cortados (0)</button>
+        <button class="btn btn-dark" onclick="showOrders()">← Voltar às POs</button>
+        <button class="btn btn-dark" onclick="showAllCuts()">Ver todos os cortes</button>
+      </div>
     </div>
+    <section class="filters po-filters">
+      <div class="field"><label>Cor</label><select id="poFilterColor" onchange="applyPoFilters()"><option value="">Todas</option><option value="black">Black</option><option value="grey">Grey</option></select></div>
+      <div class="field"><label>Espessura</label><select id="poFilterThickness" onchange="applyPoFilters()"><option value="">Todas</option></select></div>
+      <div class="field"><label>Data entrada</label><input id="poFilterDate" type="date" onchange="applyPoFilters()"></div>
+      <div class="field"><label>Ordenar por</label><select id="poSortBy" onchange="applyPoFilters()"><option value="number">Número item</option><option value="date">Data entrada</option><option value="color">Cor</option><option value="thickness">Espessura</option><option value="measure">Medida</option><option value="qty">Quantidade</option></select></div>
+      <div class="field"><label>Direção</label><select id="poSortDirection" onchange="applyPoFilters()"><option value="asc">Crescente</option><option value="desc">Decrescente</option></select></div>
+      <button class="btn btn-dark" onclick="clearPoFilters()">Limpar</button>
+    </section>
+    <div class="summary"><div id="poSummaryText">0 cortes nesta PO</div><div id="poSummaryPieces">0 peças</div></div>
+    <div id="poCutsList" class="list"></div>
+    <div id="poEmpty" class="empty hidden">SEM CORTES PENDENTES NESTE PEDIDO</div>
+  </section>
+
+  <section id="closedScreen" class="closed-screen hidden">
+    <section class="filters closed-filters">
+      <div class="field"><label>Filtrar por Ordem</label><input id="closedFilterOrder" type="text" oninput="renderClosedOrders()" placeholder="SHC..."></div>
+      <div class="field"><label>Filtrar por PO</label><input id="closedFilterPO" type="text" oninput="renderClosedOrders()" placeholder="4500..."></div>
+      <div class="field"><label>Data entrada</label><input id="closedFilterDate" type="date" onchange="renderClosedOrders()"></div>
+      <button class="btn btn-dark" onclick="clearClosedFilters()">Limpar</button>
+    </section>
+    <div class="section-title"><span>Pedidos encerrados</span><span id="closedSummary"></span></div>
+    <div id="closedGrid" class="orders-grid"></div>
+    <div id="closedEmpty" class="empty hidden">SEM PEDIDOS ENCERRADOS</div>
+  </section>
+
+  <section id="closedDetailScreen" class="closed-detail-screen hidden">
+    <div class="po-top">
+      <div><div class="selected-order" id="closedSelectedOrder">SHC000000</div><div class="selected-info" id="closedSelectedInfo">PO 0000000000</div></div>
+      <button class="btn btn-dark" onclick="showClosedOrders()">← Voltar aos encerrados</button>
+    </div>
+    <div id="closedItemsList" class="list"></div>
+    <div id="closedItemsEmpty" class="empty hidden">SEM ITENS NESTE PEDIDO</div>
   </section>
 </div>
 
+<div id="errorBox" class="error"></div>
+
 <script>
-/************************************************************
- * API DO APPS SCRIPT
- *
- * Após cada novo deploy, substitua somente a URL abaixo pela
- * URL atual terminada em /exec.
- ************************************************************/
 const API_URL = "https://script.google.com/macros/s/AKfycbz5IXyXNmrgcxtw_Z73Nr-oUKf9Zc-u4jizjprQ1Jfn3kMroZecAKAphz5dKhLQthsT/exec";
 
-let currentPreview = null;
-let previewMaterials = [];
-let previewItems = [];
-let backendInfo = null;
+let allItems = [];
+let orders = [];
+let closedOrders = [];
+let selectedOrder = "";
+let selectedPoItems = [];
+let showDoneItemsInPo = false;
 
-function getApiUrl(){
-  const value=String(API_URL||"").trim().replace(/[?#].*$/,"").replace(/\/$/,"");
-  if(!value || !/^https:\/\/script\.google\.com\/macros\/s\//i.test(value)){
-    throw new Error("Replace the API_URL constant inside this HTML with the current Apps Script /exec URL.");
-  }
-  return value;
+async function apiPost(payload) {
+  const res = await fetch(API_URL, { method: "POST", body: JSON.stringify(payload) });
+  const raw = await res.text();
+  try { return JSON.parse(raw); }
+  catch (e) { throw new Error("Server response was not valid JSON."); }
 }
 
-async function apiPost(payload){
-  const apiUrl=getApiUrl();
-  let res;
-  try{
-    res=await fetch(apiUrl,{
-      method:"POST",
-      body:JSON.stringify(payload),
-      headers:{"Content-Type":"text/plain;charset=utf-8"}
-    });
-  }catch(error){
-    throw new Error("Could not connect to the Apps Script Web App. Check the URL and deployment access.");
-  }
-
-  const raw=await res.text();
-  let data;
-  try{data=JSON.parse(raw);}
-  catch(error){throw new Error("Server response was not valid JSON: "+raw.slice(0,200));}
-
-  if(data && data.ok===false && /invalid post action/i.test(String(data.message||""))){
-    throw new Error("The API_URL inside this HTML points to an older backend deployment. Update the Apps Script deployment and replace the API_URL constant if the /exec URL changed.");
-  }
-
-  return data;
+function escapeHtml(text) {
+  return String(text || "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;");
 }
 
-async function testBackend(showMessage){
-  try{
-    if(showMessage)setMessage("Testing backend...","");
-    const data=await apiPost({action:"getCorteCdmBackendVersion"});
-    if(!data || !data.ok)throw new Error(data&&data.message?data.message:"Backend test failed.");
-
-    const version=String(data.version||"");
-    const features=data.features||{};
-    const previewSupported=features.previewImportacao===true || /v(49|50|5[1-9]|[6-9][0-9])/i.test(version);
-
-    backendInfo={version,features,previewSupported};
-
-    if(!previewSupported){
-      throw new Error("The deployed backend "+(version||"is outdated")+" and does not support PDF preview. Update the Apps Script deployment.");
-    }
-
-    if(showMessage)setMessage("Backend connected: "+version+".","ok");
-    return true;
-  }catch(error){
-    backendInfo=null;
-    if(showMessage)setMessage("Error: "+(error.message||String(error)),"error");
-    return false;
-  }
+function showError(text) {
+  const box = document.getElementById("errorBox");
+  if (!text) { box.style.display = "none"; box.textContent = ""; return; }
+  box.style.display = "block"; box.textContent = text;
 }
 
-async function ensurePreviewBackend(){
-  if(backendInfo && backendInfo.previewSupported)return true;
-  return await testBackend(false);
-}
+function updateClock() { document.getElementById("clock").textContent = new Date().toLocaleString("pt-PT"); }
 
-function escapeHtml(text){
-  return String(text||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;");
-}
-
-function formatDate(value){
-  if(!value)return "";
+function formatDate(value) {
+  if (!value) return "";
   const d = new Date(value);
-  if(isNaN(d))return String(value||"");
-  return d.toLocaleString("pt-PT");
+  if (isNaN(d)) return String(value || "");
+  return String(d.getDate()).padStart(2,"0") + "/" + String(d.getMonth()+1).padStart(2,"0") + "/" + d.getFullYear();
 }
 
-function setMessage(text,type){
-  const el=document.getElementById("importMessage");
-  el.textContent=text||"";
-  el.className="message "+(type||"");
+function dateKey(value) {
+  if (!value) return "";
+  const d = new Date(value);
+  if (isNaN(d)) return "";
+  return d.toISOString().slice(0,10);
 }
 
+function normalizeColor(value) {
+  const s = String(value || "").toLowerCase();
+  if(s.includes("grey") || s.includes("gray")) return "grey";
+  if(s.includes("black")) return "black";
+  return "unknown";
+}
 
-function hasMaterialAlert(item){
-  const status=String(item.MaterialCadastroStatus||item.materialCadastroStatus||"").trim().toUpperCase();
-  const alert=String(item.AlertaMaterial||item.alertaMaterial||"").trim();
+function hasMaterialAlert(item) {
+  const status=String((item&&item.MaterialCadastroStatus)||"").trim().toUpperCase();
+  const alert=String((item&&item.AlertaMaterial)||"").trim();
   const accepted=["CADASTRADO","OK","SELECIONADO_MANUALMENTE"];
   return !!alert || (status && !accepted.includes(status));
 }
 
-function getMaterialAlert(item){
-  return String(item.AlertaMaterial||item.alertaMaterial||"").trim();
+function isMaterialSelectedManually(item) {
+  return String((item&&item.MaterialSelecionadoManual)||"").trim().toUpperCase()==="SIM" ||
+    String((item&&item.MaterialCadastroStatus)||"").trim().toUpperCase()==="SELECIONADO_MANUALMENTE";
 }
 
-function getMaterialCodePdf(item){
-  return String(item.CodigoMaterialPDF||item.codigoMaterialPDF||item.CodigoCliente||item.codigoCliente||"").trim();
+function materialAlertText(item) {
+  return String((item&&item.AlertaMaterial)||"").trim();
 }
 
-function showMaterialAlarm(itens,alertasServidor){
-  const box=document.getElementById("materialAlertBox");
-  const alertItems=(itens||[]).filter(hasMaterialAlert);
-  const messages=(alertasServidor&&alertasServidor.length)
-    ? alertasServidor
-    : alertItems.map(item=>"Item "+(item.ItemCliente||item.itemCliente||"")+": "+getMaterialAlert(item));
-
-  if(!messages.length){
-    box.classList.add("hidden");
-    box.innerHTML="";
-    return;
-  }
-
-  box.classList.remove("hidden");
-  box.innerHTML=`
-    <h3>⚠ MATÉRIA-PRIMA NÃO CADASTRADA</h3>
-    <div>O pedido foi importado, mas ${messages.length} item(ns) precisam de verificação.</div>
-    <ul>${messages.map(msg=>`<li>${escapeHtml(msg)}</li>`).join("")}</ul>
-  `;
-}
-
-/************************************************************
- * CDM COLOR SAFETY
- * Regra absoluta:
- * 68940 / 68.940 = grey
- * 68910 / 68.910 = black
- ************************************************************/
-function getCdmColor(item){
-  const material=String(item.Material||item.material||"");
-  const serie=String(item.Serie||item.serie||"");
-  const cor=String(item.Cor||item.cor||"");
-  const full=(material+" "+serie+" "+cor).toLowerCase();
-
-  if(full.includes("68940") || full.includes("68.940") || full.includes("68,940")) return "grey";
-  if(full.includes("68910") || full.includes("68.910") || full.includes("68,910")) return "black";
-  if(full.includes("grey") || full.includes("gray")) return "grey";
-  if(full.includes("black")) return "black";
-  return "";
-}
-
-function getCdmSerie(color){
-  if(color==="grey") return "68.940";
-  if(color==="black") return "68.910N";
-  return "";
-}
-
-function getSafeMaterial(item){
-  if(hasMaterialAlert(item)){
-    const original=String(item.MaterialOriginalPDF||item.materialOriginalPDF||"").trim();
-    const material=String(item.Material||item.material||"").trim();
-    return original || material || ("CDM "+getMaterialCodePdf(item));
-  }
-
-  const color=getCdmColor(item);
-  const serie=getCdmSerie(color);
-  const esp=item.Espessura||item.espessura||"";
-  if(serie && color) return "CDM ESD "+serie+" "+color+" "+esp+" mm";
-  return item.Material||item.material||"";
-}
-
-function fileToBase64(file){
-  return new Promise((resolve,reject)=>{
-    const reader=new FileReader();
-    reader.onload=()=>resolve(reader.result);
-    reader.onerror=reject;
-    reader.readAsDataURL(file);
-  });
-}
-
-async function preparePdfPreview(){
-  try{
-    const backendReady=await ensurePreviewBackend();
-    if(!backendReady){
-      setMessage("Error: The backend in API_URL does not support PDF review. Update the Apps Script deployment and replace API_URL if the /exec URL changed.","error");
-      return;
-    }
-
-    const fileInput=document.getElementById("pdfFile");
-    const email=document.getElementById("userEmail").value.trim();
-
-    if(!fileInput.files.length){
-      setMessage("Select a PDF file first.","error");
-      return;
-    }
-
-    if(currentPreview && currentPreview.previewId){
-      const proceed=confirm("There is already an open preview. Cancel it and read the new PDF?");
-      if(!proceed)return;
-      await cancelCurrentPreview(true);
-    }
-
-    const file=fileInput.files[0];
-    setMessage("Reading PDF and preparing preview...","");
-
-    const base64=await fileToBase64(file);
-    const data=await apiPost({
-      action:"prepararImportacaoPedidoCdmPdf",
-      filename:file.name,
-      base64,
-      userEmail:email
-    });
-
-    if(!data.ok)throw new Error(data.message||"Preview error.");
-
-    currentPreview=data;
-    previewMaterials=data.materiaisCadastro||[];
-    previewItems=(data.itens||[]).map(item=>Object.assign({},item,{_importar:true,_materialCadastroID:""}));
-
-    renderImportPreview(data);
-    setMessage("PDF read. Review all items and confirm the import.","warning");
-    document.getElementById("previewSection").scrollIntoView({behavior:"smooth",block:"start"});
-
-  }catch(error){
-    setMessage("Error: "+error.message,"error");
-  }
-}
-
-function renderImportPreview(data){
-  document.getElementById("previewSection").classList.remove("hidden");
-  document.getElementById("importedSection").classList.add("hidden");
-
-  const pedido=data.pedido||{};
-  document.getElementById("prevOrder").textContent=pedido.OrdemCorte||"-";
-  document.getElementById("prevPo").textContent=pedido.NumeroPO||"-";
-  document.getElementById("prevPdfItems").textContent=data.totalItens||previewItems.length;
-  document.getElementById("prevPdfPieces").textContent=data.totalPecas||previewItems.reduce((s,i)=>s+Number(i.Quantidade||0),0);
-
-  showPreviewMaterialAlarm(previewItems);
-  renderPreviewRows();
-  updatePreviewSummary();
-}
-
-function showPreviewMaterialAlarm(items){
-  const box=document.getElementById("previewMaterialAlertBox");
-  const alerts=(items||[]).filter(item=>item._importar!==false && hasMaterialAlert(item) && !item._materialCadastroID);
+function renderMaterialGlobalWarning() {
+  const box=document.getElementById("materialGlobalWarning");
+  const alerts=allItems.filter(hasMaterialAlert);
 
   if(!alerts.length){
     box.classList.add("hidden");
@@ -415,334 +277,1232 @@ function showPreviewMaterialAlarm(items){
     return;
   }
 
+  const ordersWithAlerts=[...new Set(alerts.map(i=>i.OrdemCorte).filter(Boolean))];
   box.classList.remove("hidden");
-  box.innerHTML=`
-    <h3>⚠ MATERIAL REVIEW REQUIRED</h3>
-    <div>${alerts.length} item(s) contain a raw material that was not confirmed in the register.</div>
-    <div style="margin-top:8px">For each highlighted item you can:</div>
-    <ul>
-      <li>keep it selected and import it with the warning;</li>
-      <li>choose the correct registered raw material;</li>
-      <li>uncheck the item so it is not imported.</li>
-    </ul>
-  `;
+  box.innerHTML=`⚠ MATÉRIA-PRIMA NÃO CADASTRADA — ${alerts.length} corte(s) em ${ordersWithAlerts.length} obra(s). Abra a obra e confira os itens destacados em laranja.`;
 }
 
-function renderPreviewRows(){
-  const body=document.getElementById("previewItemsBody");
-  body.innerHTML="";
+function itemNumber(item) { return Number(String(item.ItemCliente || "").replace(/\D/g,"")) || 999999; }
+function countPieces(items) { return items.reduce((sum,item) => sum + Number(item.Quantidade || 0), 0); }
 
-  previewItems.slice().sort((a,b)=>{
-    const ai=Number(String(a.ItemCliente||"").replace(/\D/g,""))||999999;
-    const bi=Number(String(b.ItemCliente||"").replace(/\D/g,""))||999999;
-    return ai-bi;
-  }).forEach(item=>{
-    const row=document.createElement("tr");
-    const alert=hasMaterialAlert(item);
-    const selected=!!item._importar;
-    const manual=!!item._materialCadastroID;
-
-    row.dataset.previewItemId=item.PreviewItemID;
-    if(!selected)row.classList.add("row-excluded");
-    else if(manual)row.classList.add("row-material-corrected");
-    else if(alert)row.classList.add("row-material-alert");
-
-    const options=buildMaterialOptions(item);
-    const statusText=manual
-      ? "SELECTED MANUALLY"
-      : alert
-        ? (item.MaterialCadastroStatus||"WARNING")
-        : "REGISTERED";
-    const statusClass=manual?"manual":alert?"material-warning":"registered";
-
-    row.innerHTML=`
-      <td><input class="preview-check" type="checkbox" ${selected?"checked":""} onchange="togglePreviewItem('${escapeHtml(item.PreviewItemID)}',this.checked)"></td>
-      <td>${escapeHtml(item.ItemCliente||"")}</td>
-      <td>${escapeHtml(item.OrdemCorte||currentPreview.pedido.OrdemCorte||"")}</td>
-      <td>${escapeHtml(item.NumeroPO||currentPreview.pedido.NumeroPO||"")}</td>
-      <td><span class="code-raw">${escapeHtml(getMaterialCodePdf(item))}</span></td>
-      <td>
-        ${escapeHtml(getSafeMaterial(item))}
-        ${alert&&!manual?`<div class="alert-detail">⚠ ${escapeHtml(getMaterialAlert(item))}</div>`:""}
-      </td>
-      <td><span class="badge ${escapeHtml(getCdmColor(item))}">${escapeHtml(getCdmColor(item)||"unknown")}</span></td>
-      <td>${escapeHtml(item.Espessura||"")} mm</td>
-      <td>${escapeHtml(item.Largura||"")} x ${escapeHtml(item.Comprimento||"")}</td>
-      <td>${escapeHtml(item.Quantidade||"")}</td>
-      <td><span class="badge ${statusClass}">${escapeHtml(statusText)}</span></td>
-      <td>
-        <select class="material-choice" onchange="changePreviewMaterial('${escapeHtml(item.PreviewItemID)}',this.value)" ${selected?"":"disabled"}>
-          ${options}
-        </select>
-      </td>
-    `;
-
-    body.appendChild(row);
+function groupOrders(items) {
+  const map = {};
+  items.forEach(item => {
+    const key = item.OrdemCorte || "SEM_ORDEM";
+    if (!map[key]) map[key] = { OrdemCorte:item.OrdemCorte || "", NumeroPO:item.NumeroPO || "", count:0, pieces:0, materialAlerts:0, items:[], created:item.CriadoEm || "" };
+    map[key].count += 1;
+    map[key].pieces += Number(item.Quantidade || 0);
+    if(hasMaterialAlert(item)) map[key].materialAlerts += 1;
+    map[key].items.push(item);
   });
+  return Object.values(map).sort((a,b) => String(a.OrdemCorte).localeCompare(String(b.OrdemCorte)));
 }
 
-function buildMaterialOptions(item){
-  const alert=hasMaterialAlert(item);
-  const currentLabel=alert
-    ? "Import using PDF material and keep warning"
-    : "Use material already recognised";
+async function loadAll(showErrors=false) {
+  try {
+    const openData = await apiPost({ action:"getFilaCorteCdm" });
+    if (!openData.ok) throw new Error(openData.message || "Error loading open cuts.");
+    allItems = openData.items || [];
+    orders = groupOrders(allItems);
+    renderMaterialGlobalWarning();
 
-  let html=`<option value="" ${item._materialCadastroID?"":"selected"}>${escapeHtml(currentLabel)}</option>`;
-  const thickness=Number(String(item.Espessura||"").replace(",","."));
-  const sameThickness=previewMaterials.filter(material=>Number(material.Espessura)===thickness);
+    const closedData = await apiPost({ action:"getPedidosCorteCdmEncerrados", limit:500 });
+    if (closedData.ok) closedOrders = closedData.items || [];
 
-  sameThickness.forEach(material=>{
-    const suggested=String(item.MaterialCadastroSugerido||"").includes(String(material.ID||""));
-    const selected=String(item._materialCadastroID||"")===String(material.ID||"");
-    const label=(suggested?"★ Suggested - ":"")+(material.Label||[material.ID,material.Codigo,material.Cor,material.Espessura+" mm",material.Descricao].filter(Boolean).join(" | "));
-    html+=`<option value="${escapeHtml(material.ID)}" ${selected?"selected":""}>${escapeHtml(label)}</option>`;
-  });
+    populateGlobalFilters();
 
-  if(!sameThickness.length){
-    html+=`<option value="" disabled>No registered material with ${escapeHtml(item.Espessura||"")} mm</option>`;
+    const mode = getCurrentMode();
+    if (mode === "closed") renderClosedOrders();
+    else if (mode === "po" && selectedOrder) { await loadSelectedOrderItems(false); }
+    else if (mode === "list") applyGlobalFilters();
+    else showOrders();
+
+    showError("");
+  } catch (error) {
+    if (showErrors) showError("Erro ao carregar dados: " + error.message);
   }
-
-  return html;
 }
 
-function togglePreviewItem(previewItemId,checked){
-  const item=previewItems.find(row=>String(row.PreviewItemID)===String(previewItemId));
-  if(!item)return;
-  item._importar=!!checked;
-  renderPreviewRows();
-  updatePreviewSummary();
+function getCurrentMode() {
+  if (!document.getElementById("poScreen").classList.contains("hidden")) return "po";
+  if (!document.getElementById("listScreen").classList.contains("hidden")) return "list";
+  if (!document.getElementById("closedScreen").classList.contains("hidden")) return "closed";
+  if (!document.getElementById("closedDetailScreen").classList.contains("hidden")) return "closedDetail";
+  return "orders";
 }
 
-function changePreviewMaterial(previewItemId,materialCadastroID){
-  const item=previewItems.find(row=>String(row.PreviewItemID)===String(previewItemId));
-  if(!item)return;
-  item._materialCadastroID=String(materialCadastroID||"");
-  renderPreviewRows();
-  updatePreviewSummary();
+function showOnly(id) {
+  ["ordersScreen","listScreen","poScreen","closedScreen","closedDetailScreen"].forEach(screenId => document.getElementById(screenId).classList.add("hidden"));
+  document.getElementById(id).classList.remove("hidden");
 }
 
-function selectAllPreviewItems(selected){
-  previewItems.forEach(item=>item._importar=!!selected);
-  renderPreviewRows();
-  updatePreviewSummary();
+function showOrders() { selectedOrder = ""; document.getElementById("subtitle").textContent = "Pedidos em aberto"; showOnly("ordersScreen"); renderOrders(); }
+function showAllCuts() { selectedOrder = ""; document.getElementById("subtitle").textContent = "Visão geral filtrável"; showOnly("listScreen"); applyGlobalFilters(); }
+function showClosedOrders() { selectedOrder = ""; document.getElementById("subtitle").textContent = "Pedidos encerrados"; showOnly("closedScreen"); renderClosedOrders(); }
+async function openOrder(ordem) {
+  selectedOrder = ordem;
+  selectedPoItems = [];
+  showDoneItemsInPo = false;
+  document.getElementById("subtitle").textContent = "Cortes da PO selecionada";
+  showOnly("poScreen");
+  document.getElementById("selectedOrder").textContent = selectedOrder || "";
+  document.getElementById("selectedInfo").textContent = "A carregar cortes da obra...";
+  await loadSelectedOrderItems(true);
+}
+function orderStillExists(ordem) { return orders.some(order => order.OrdemCorte === ordem); }
+
+function renderOrders() {
+  const grid = document.getElementById("ordersGrid");
+  const empty = document.getElementById("ordersEmpty");
+  grid.innerHTML = "";
+  const totalPieces = orders.reduce((sum, order) => sum + Number(order.pieces || 0), 0);
+  document.getElementById("ordersSummary").textContent = orders.length + " POs • " + totalPieces + " peças";
+  if (!orders.length) { empty.classList.remove("hidden"); grid.classList.add("hidden"); return; }
+  empty.classList.add("hidden"); grid.classList.remove("hidden");
+
+  orders.forEach(order => {
+    const card = document.createElement("div");
+    card.className = "order-card" + (Number(order.materialAlerts||0) ? " material-alert" : "");
+    card.onclick = () => openOrder(order.OrdemCorte);
+    card.innerHTML = `<div class="order-number">${escapeHtml(order.OrdemCorte)}</div><div class="order-po">PO ${escapeHtml(order.NumeroPO)}</div><div class="order-meta">${escapeHtml(order.count)} cortes • ${escapeHtml(order.pieces)} peças</div>${Number(order.materialAlerts||0)?`<div class="order-alert">⚠ ${escapeHtml(order.materialAlerts)} matéria(s)-prima(s) não cadastrada(s)</div>`:""}<div class="order-small">Clique para abrir esta PO</div>`;
+    grid.appendChild(card);
+  });
 }
 
-function getPreviewSummary(){
-  const selected=previewItems.filter(item=>item._importar);
-  const excluded=previewItems.filter(item=>!item._importar);
-  const warnings=selected.filter(item=>hasMaterialAlert(item)&&!item._materialCadastroID);
-  const corrected=selected.filter(item=>!!item._materialCadastroID);
+function populateGlobalFilters() {
+  const orderSelect = document.getElementById("filterOrder");
+  const thicknessSelect = document.getElementById("filterThickness");
+  const currentOrder = orderSelect.value;
+  const currentThickness = thicknessSelect.value;
 
-  return{
-    selected,
-    excluded,
-    warnings,
-    corrected,
-    pieces:selected.reduce((sum,item)=>sum+Number(item.Quantidade||0),0)
-  };
+  const orderValues = [...new Set(allItems.map(item => item.OrdemCorte).filter(Boolean))].sort();
+  orderSelect.innerHTML = '<option value="">Todos</option>' + orderValues.map(order => `<option value="${escapeHtml(order)}">${escapeHtml(order)}</option>`).join("");
+  orderSelect.value = orderValues.includes(currentOrder) ? currentOrder : "";
+
+  const thicknessValues = [...new Set(allItems.map(item => String(item.Espessura || "")).filter(Boolean))].sort((a,b) => Number(a)-Number(b));
+  thicknessSelect.innerHTML = '<option value="">Todas</option>' + thicknessValues.map(t => `<option value="${escapeHtml(t)}">${escapeHtml(t)} mm</option>`).join("");
+  thicknessSelect.value = thicknessValues.includes(currentThickness) ? currentThickness : "";
 }
 
-function updatePreviewSummary(){
-  const summary=getPreviewSummary();
-  showPreviewMaterialAlarm(previewItems);
-  document.getElementById("prevSelectedItems").textContent=summary.selected.length;
-  document.getElementById("prevSelectedPieces").textContent=summary.pieces;
-  document.getElementById("prevExcludedItems").textContent=summary.excluded.length;
-  document.getElementById("prevWarnings").textContent=summary.warnings.length;
-
-  const parts=[
-    summary.selected.length+" item(s) selected",
-    summary.excluded.length+" excluded",
-    summary.corrected.length+" material correction(s)",
-    summary.warnings.length+" warning(s) kept"
-  ];
-  document.getElementById("previewDecisionText").textContent=parts.join(" • ");
+function clearGlobalFilters() {
+  document.getElementById("filterOrder").value = "";
+  document.getElementById("filterColor").value = "";
+  document.getElementById("filterThickness").value = "";
+  document.getElementById("filterDate").value = "";
+  document.getElementById("sortBy").value = "number";
+  applyGlobalFilters();
 }
 
-async function confirmCurrentPreview(){
-  try{
-    if(!currentPreview||!currentPreview.previewId)throw new Error("No active preview.");
+function applyGlobalFilters() {
+  const order = document.getElementById("filterOrder").value;
+  const color = document.getElementById("filterColor").value;
+  const thickness = document.getElementById("filterThickness").value;
+  const date = document.getElementById("filterDate").value;
+  const sortBy = document.getElementById("sortBy").value;
 
-    const summary=getPreviewSummary();
-    if(!summary.selected.length)throw new Error("Select at least one item to import.");
+  let items = allItems.filter(item => {
+    if (order && item.OrdemCorte !== order) return false;
+    if (color && normalizeColor(item.Cor) !== color) return false;
+    if (thickness && String(item.Espessura) !== String(thickness)) return false;
+    if (date && dateKey(item.CriadoEm) !== date) return false;
+    return true;
+  });
 
-    const warnings=[];
-    if(summary.excluded.length)warnings.push(summary.excluded.length+" item(s) will NOT be imported");
-    if(summary.warnings.length)warnings.push(summary.warnings.length+" material warning(s) will remain");
+  items = sortItems(items, sortBy);
+  document.getElementById("summaryText").textContent = items.length + " cortes em aberto";
+  document.getElementById("summaryPieces").textContent = countPieces(items) + " peças";
+  renderRows(items, "cutsList", "listEmpty", false);
+}
 
-    if(warnings.length){
-      const proceed=confirm("Please confirm:\n\n- "+warnings.join("\n- ")+"\n\nContinue with the import?");
-      if(!proceed)return;
-    }
+function getSelectedPoItems() {
+  return selectedPoItems && selectedPoItems.length
+    ? selectedPoItems
+    : allItems.filter(item => item.OrdemCorte === selectedOrder);
+}
 
-    setMessage("Confirming import...","");
+async function loadSelectedOrderItems(showErrors) {
+  if (!selectedOrder) return;
 
-    const decisoes=previewItems.map(item=>({
-      PreviewItemID:item.PreviewItemID,
-      importar:!!item._importar,
-      materialCadastroID:item._materialCadastroID||""
-    }));
+  try {
+    const openOrderData = orders.find(o => o.OrdemCorte === selectedOrder);
+    const numeroPO = openOrderData ? openOrderData.NumeroPO : "";
 
-    const data=await apiPost({
-      action:"confirmarImportacaoPedidoCdmPdf",
-      previewId:currentPreview.previewId,
-      userEmail:document.getElementById("userEmail").value.trim(),
-      decisoes
+    const data = await apiPost({
+      action: "getItensCorteCdmPorPedido",
+      ordemCorte: selectedOrder,
+      numeroPO: numeroPO,
+      includeClosed: true
     });
 
-    if(!data.ok)throw new Error(data.message||"Import confirmation error.");
+    if (!data.ok) throw new Error(data.message || "Erro ao carregar itens da obra.");
 
-    setMessage(
-      data.totalAlertasMaterial
-        ? "PO imported with "+data.totalAlertasMaterial+" warning(s)."
-        : "PO imported successfully after review.",
-      data.totalAlertasMaterial?"warning":"ok"
+    selectedPoItems = data.items || [];
+
+    populatePoFilters();
+    applyPoFilters();
+
+  } catch (error) {
+    if (showErrors) showError("Erro ao carregar obra: " + error.message);
+
+    selectedPoItems = allItems.filter(item => item.OrdemCorte === selectedOrder);
+    populatePoFilters();
+    applyPoFilters();
+  }
+}
+
+function populatePoFilters() {
+  const thicknessSelect = document.getElementById("poFilterThickness");
+  const currentThickness = thicknessSelect.value;
+  const items = getSelectedPoItems();
+  const thicknessValues = [...new Set(items.map(item => String(item.Espessura || "")).filter(Boolean))].sort((a,b) => Number(a)-Number(b));
+  thicknessSelect.innerHTML = '<option value="">Todas</option>' + thicknessValues.map(t => `<option value="${escapeHtml(t)}">${escapeHtml(t)} mm</option>`).join("");
+  thicknessSelect.value = thicknessValues.includes(currentThickness) ? currentThickness : "";
+}
+
+function clearPoFilters() {
+  document.getElementById("poFilterColor").value = "";
+  document.getElementById("poFilterThickness").value = "";
+  document.getElementById("poFilterDate").value = "";
+  document.getElementById("poSortBy").value = "number";
+  document.getElementById("poSortDirection").value = "asc";
+  applyPoFilters();
+}
+
+
+function toggleDoneItemsInPo() {
+  showDoneItemsInPo = !showDoneItemsInPo;
+  applyPoFilters();
+}
+
+function atualizarBotaoCortadosPo_(doneCount) {
+  const button = document.getElementById("toggleDoneItemsBtn");
+  if (!button) return;
+
+  const total = Number(doneCount || 0);
+
+  if (showDoneItemsInPo) {
+    button.textContent = "Ocultar cortados";
+    button.className = "btn btn-dark";
+    button.setAttribute("aria-pressed", "true");
+  } else {
+    button.textContent = "Mostrar cortados (" + total + ")";
+    button.className = "btn btn-blue";
+    button.setAttribute("aria-pressed", "false");
+  }
+}
+
+function applyPoFilters() {
+  const color = document.getElementById("poFilterColor").value;
+  const thickness = document.getElementById("poFilterThickness").value;
+  const date = document.getElementById("poFilterDate").value;
+  const sortBy = document.getElementById("poSortBy").value;
+  const direction = document.getElementById("poSortDirection").value;
+
+  const todosDaPo = getSelectedPoItems();
+
+  let itemsFiltrados = todosDaPo.filter(item => {
+    if (color && normalizeColor(item.Cor) !== color) return false;
+    if (thickness && String(item.Espessura) !== String(thickness)) return false;
+    if (date && dateKey(item.CriadoEm) !== date) return false;
+    return true;
+  });
+
+  const openCount = todosDaPo.filter(item => isItemOpen(item)).length;
+  const doneCount = todosDaPo.length - openCount;
+  const materialAlerts = todosDaPo.filter(hasMaterialAlert).length;
+
+  atualizarBotaoCortadosPo_(doneCount);
+
+  const itemsVisiveis = showDoneItemsInPo
+    ? itemsFiltrados
+    : itemsFiltrados.filter(item => isItemOpen(item));
+
+  const items = sortItems(itemsVisiveis, sortBy, direction);
+
+  const order = orders.find(o => o.OrdemCorte === selectedOrder);
+  const refItem = selectedPoItems.find(i => i.OrdemCorte === selectedOrder) || {};
+  const poNumber = order ? order.NumeroPO : (refItem.NumeroPO || "");
+
+  document.getElementById("selectedOrder").textContent = selectedOrder || "";
+  document.getElementById("selectedInfo").textContent =
+    "PO " + poNumber +
+    " • " + openCount + " em aberto" +
+    " • " + doneCount + " cortados" +
+    (materialAlerts ? " • ⚠ " + materialAlerts + " material(is) não cadastrado(s)" : "");
+
+  document.getElementById("poSummaryText").textContent =
+    items.length + " cortes visíveis" +
+    (showDoneItemsInPo ? " — abertos e cortados" : " — somente em aberto");
+
+  document.getElementById("poSummaryPieces").textContent =
+    countPieces(items) + " peças visíveis";
+
+  const empty = document.getElementById("poEmpty");
+  empty.textContent = showDoneItemsInPo
+    ? "SEM ITENS PARA OS FILTROS SELECIONADOS"
+    : "SEM CORTES PENDENTES NESTE PEDIDO";
+
+  renderRows(items, "poCutsList", "poEmpty", false);
+}
+
+function clearClosedFilters() {
+  document.getElementById("closedFilterOrder").value = "";
+  document.getElementById("closedFilterPO").value = "";
+  document.getElementById("closedFilterDate").value = "";
+  renderClosedOrders();
+}
+
+function renderClosedOrders() {
+  const grid = document.getElementById("closedGrid");
+  const empty = document.getElementById("closedEmpty");
+  const orderText = String(document.getElementById("closedFilterOrder").value || "").toLowerCase();
+  const poText = String(document.getElementById("closedFilterPO").value || "").toLowerCase();
+  const date = document.getElementById("closedFilterDate").value;
+
+  let items = closedOrders.filter(order => {
+    if (orderText && !String(order.OrdemCorte || "").toLowerCase().includes(orderText)) return false;
+    if (poText && !String(order.NumeroPO || "").toLowerCase().includes(poText)) return false;
+    if (date && dateKey(order.CriadoEm) !== date) return false;
+    return true;
+  });
+
+  grid.innerHTML = "";
+  document.getElementById("closedSummary").textContent = items.length + " pedidos";
+
+  if (!items.length) { empty.classList.remove("hidden"); grid.classList.add("hidden"); return; }
+  empty.classList.add("hidden"); grid.classList.remove("hidden");
+
+  items.forEach(order => {
+    const card = document.createElement("div");
+    const totalAlerts=Number(order.TotalAlertasMaterial||0);
+    card.className = "order-card" + (totalAlerts ? " material-alert" : "");
+    card.onclick = () => openClosedOrder(order);
+    card.innerHTML = `<div class="order-number">${escapeHtml(order.OrdemCorte)}</div><div class="order-po">PO ${escapeHtml(order.NumeroPO)}</div><div class="order-meta">${escapeHtml(order.TotalItens)} cortes • ${escapeHtml(order.TotalPecas)} peças</div>${totalAlerts?`<div class="order-alert">⚠ ${escapeHtml(totalAlerts)} matéria(s)-prima(s) não cadastrada(s)</div>`:""}<div class="order-small">Entrada: ${escapeHtml(formatDate(order.CriadoEm))}</div>`;
+    grid.appendChild(card);
+  });
+}
+
+async function openClosedOrder(order) {
+  try {
+    document.getElementById("subtitle").textContent = "Pedido encerrado";
+    showOnly("closedDetailScreen");
+    document.getElementById("closedSelectedOrder").textContent = order.OrdemCorte || "";
+    document.getElementById("closedSelectedInfo").textContent = "PO " + (order.NumeroPO || "") + " • pedido encerrado";
+
+    const data = await apiPost({ action:"getItensCorteCdmPorPedido", ordemCorte:order.OrdemCorte, numeroPO:order.NumeroPO, includeClosed:true });
+    if (!data.ok) throw new Error(data.message || "Erro ao carregar itens encerrados.");
+
+    renderRows(sortItems(data.items || [], "number"), "closedItemsList", "closedItemsEmpty", true);
+  } catch (error) {
+    showError("Erro ao abrir pedido encerrado: " + error.message);
+  }
+}
+
+function sortItems(items, sortBy, direction) {
+  const copy = [...items];
+  const dir = direction === "desc" ? -1 : 1;
+
+  copy.sort((a,b) => {
+    let result = 0;
+
+    if (sortBy === "date") {
+      result = String(a.CriadoEm || "").localeCompare(String(b.CriadoEm || "")) ||
+               String(a.OrdemCorte || "").localeCompare(String(b.OrdemCorte || "")) ||
+               itemNumber(a) - itemNumber(b);
+    } else if (sortBy === "order") {
+      result = String(a.OrdemCorte || "").localeCompare(String(b.OrdemCorte || "")) ||
+               itemNumber(a) - itemNumber(b);
+    } else if (sortBy === "color") {
+      result = normalizeColor(a.Cor).localeCompare(normalizeColor(b.Cor)) ||
+               Number(a.Espessura || 0) - Number(b.Espessura || 0) ||
+               itemNumber(a) - itemNumber(b);
+    } else if (sortBy === "thickness") {
+      result = Number(a.Espessura || 0) - Number(b.Espessura || 0) ||
+               itemNumber(a) - itemNumber(b);
+    } else if (sortBy === "measure") {
+      result = Number(a.Largura || 0) - Number(b.Largura || 0) ||
+               Number(a.Comprimento || 0) - Number(b.Comprimento || 0) ||
+               itemNumber(a) - itemNumber(b);
+    } else if (sortBy === "qty") {
+      result = Number(a.Quantidade || 0) - Number(b.Quantidade || 0) ||
+               itemNumber(a) - itemNumber(b);
+    } else {
+      // number / item
+      result = itemNumber(a) - itemNumber(b) ||
+               Number(a.Ordem || 0) - Number(b.Ordem || 0);
+    }
+
+    return result * dir;
+  });
+
+  return copy;
+}
+
+function isItemOpen(item) {
+  const status = String((item && item.Status) || "").trim().toLowerCase();
+  return !status || status === "por cortar" || status === "aberto" || status === "pendente";
+}
+
+function renderRows(items, listId, emptyId, readonly) {
+  const list = document.getElementById(listId);
+  const empty = document.getElementById(emptyId);
+  list.innerHTML = "";
+
+  if (!items.length) { empty.classList.remove("hidden"); list.classList.add("hidden"); return; }
+  empty.classList.add("hidden"); list.classList.remove("hidden");
+
+  items.forEach(item => {
+    const color = normalizeColor(item.Cor);
+    const itemJson = encodeURIComponent(JSON.stringify(item));
+    const aberto = isItemOpen(item);
+    const doneClass = aberto ? "" : " done";
+    const materialAlert = hasMaterialAlert(item);
+    const materialAlertClass = materialAlert ? " material-alert" : "";
+    const materialManual = isMaterialSelectedManually(item);
+
+    let buttons = "";
+    if (readonly || !aberto) {
+      buttons = `<button class="cut-label" onclick="printLabelFromEncoded('${itemJson}')">ETIQUETA</button><div class="cut-done-label">CORTADO</div>`;
+    } else {
+      buttons = `<button class="cut-label" onclick="printLabelFromEncoded('${itemJson}')">ETIQUETA</button><button class="cut-ok" onclick="confirmDone('${escapeHtml(item.IDItem)}')">OK</button>`;
+    }
+
+    const row = document.createElement("div");
+    row.className = "cut-row " + color + doneClass + materialAlertClass;
+    row.title = materialAlert ? materialAlertText(item) : "";
+
+    const alertHtml = materialAlert
+      ? `<div class="cut-material-alert-row"><span class="cut-material-alert-title">⚠ MATÉRIA-PRIMA NÃO CADASTRADA</span><span class="cut-material-alert-detail">${escapeHtml(materialAlertText(item))}</span></div>`
+      : "";
+
+    row.innerHTML = `<div class="cut-item">${escapeHtml(item.ItemCliente || "-")}</div><div class="cut-order">${escapeHtml(item.OrdemCorte)}<span class="cut-small">PO ${escapeHtml(item.NumeroPO)}</span></div><div class="cut-material">CDM ${escapeHtml(String(item.Cor || "UNKNOWN").toUpperCase())}<span class="cut-small">CÓD. ${escapeHtml(item.CodigoMaterialPDF || item.CodigoCliente || "-")}</span>${materialManual?`<span class="material-manual-badge" title="Selecionado por ${escapeHtml(item.MaterialSelecionadoPor||"")}">MATERIAL MANUAL</span>`:""}</div><div class="cut-thickness">${escapeHtml(item.Espessura)} mm</div><div class="cut-measure">${escapeHtml(item.Largura)} x ${escapeHtml(item.Comprimento)}</div><div class="cut-qty">QTD ${escapeHtml(item.Quantidade)}</div><div class="cut-date">${escapeHtml(formatDate(item.CriadoEm))}</div><div class="cut-buttons">${buttons}</div>${alertHtml}`;
+    list.appendChild(row);
+  });
+}
+
+function printLabelFromEncoded(encoded) {
+  const item = JSON.parse(decodeURIComponent(encoded));
+  printLabel(item);
+}
+
+
+/************************************************************
+ * QR CDM PARA ETIQUETA DA SERRA
+ *
+ * Regra real:
+ * - SHC = corte/CDM.
+ * - SH = maquinação, só quando existir no futuro.
+ * - Não inventar SH.
+ *
+ * Formato do QR da Serra:
+ * SHC008301|00010|BLACK|8|401x521|Q5
+ ************************************************************/
+function getQrTextoCdmFromItem(item) {
+  item = item || {};
+
+  if (item.QrTextoCdm) return String(item.QrTextoCdm).trim();
+  if (item.CodigoQrCdm) return String(item.CodigoQrCdm).trim();
+  if (item.EtiquetaQrTexto) return String(item.EtiquetaQrTexto).trim();
+  if (item.CodigoExpedicao) return String(item.CodigoExpedicao).trim();
+
+  return montarQrCorteCdmLocal(item);
+}
+
+function getQrUrlCdmFromItem(item) {
+  item = item || {};
+
+  if (item.QrUrlCdm) return String(item.QrUrlCdm).trim();
+  if (item.EtiquetaQrUrl) return String(item.EtiquetaQrUrl).trim();
+
+  const texto = getQrTextoCdmFromItem(item);
+  return "https://quickchart.io/qr?text=" + encodeURIComponent(texto) + "&size=180&margin=1";
+}
+
+function montarQrCorteCdmLocal(item) {
+  const shc = String(item.OrdemCorte || item.SHC || "").trim();
+  const itemCliente = normalizarItemClienteCdmLocal(item.ItemCliente || item.Item || "");
+  const cor = normalizarCorQrCdmLocal(item.Cor || "");
+  const espessura = normalizarNumeroQrCdmLocal(item.Espessura || "");
+  const comprimento = normalizarNumeroQrCdmLocal(item.Comprimento || "");
+  const largura = normalizarNumeroQrCdmLocal(item.Largura || "");
+  const quantidade = normalizarQuantidadeQrCdmLocal(item.Quantidade || "");
+
+  if (!/^SHC\d+/i.test(shc)) {
+    return "";
+  }
+
+  const dimensao = comprimento && largura ? `${comprimento}x${largura}` : "";
+
+  return [
+    shc,
+    itemCliente,
+    cor,
+    espessura,
+    dimensao,
+    `Q${quantidade}`
+  ].join("|");
+}
+
+function normalizarItemClienteCdmLocal(valor) {
+  const raw = String(valor || "").trim();
+  if (!raw) return "";
+
+  const digitos = raw.replace(/\D/g, "");
+  return digitos ? digitos.padStart(5, "0") : raw;
+}
+
+function normalizarCorQrCdmLocal(valor) {
+  const v = String(valor || "").trim().toUpperCase();
+
+  if (v.includes("BLACK") || v.includes("PRETO") || v.includes("68910") || v.includes("68.910")) return "BLACK";
+  if (v.includes("GREY") || v.includes("GRAY") || v.includes("CINZA") || v.includes("68940") || v.includes("68.940")) return "GREY";
+
+  return v;
+}
+
+function normalizarNumeroQrCdmLocal(valor) {
+  const raw = String(valor || "").trim();
+  if (!raw) return "";
+
+  const n = Number(raw.replace(",", "."));
+
+  if (!isNaN(n)) {
+    if (Math.round(n) === n) return String(Math.round(n));
+    return String(n).replace(".", ",");
+  }
+
+  return raw;
+}
+
+function normalizarQuantidadeQrCdmLocal(valor) {
+  const raw = String(valor || "").trim();
+  const n = Number(raw.replace(",", "."));
+
+  if (!isNaN(n) && n > 0) return String(Math.round(n));
+
+  return raw;
+}
+
+
+function todayLabel() {
+  const d = new Date();
+  return String(d.getDate()).padStart(2,"0") + "/" + String(d.getMonth()+1).padStart(2,"0") + "/" + d.getFullYear();
+}
+
+function printLabel(item) {
+  const color = normalizeColor(item.Cor);
+  const codigoCliente = String(item.CodigoCliente || "").trim().toUpperCase();
+  const baseCode = color === "black" ? "68910" : (color === "grey" ? "68940" : String(item.CodigoMaterialPDF || item.CodigoCliente || "UNKNOWN"));
+
+  // Usa exatamente o CodigoCliente quando existir.
+  // Ex.: ZU68910, 68910, ZU68940 ou 68940.
+  // Se vier vazio, usa o código base pela cor.
+  const cdmText = codigoCliente || baseCode;
+
+  const date = todayLabel();
+  const ordem = String(item.OrdemCorte || "").replace(/^SHC/,"");
+  // O ITEM da etiqueta deve vir exclusivamente de ItemCliente.
+  // Nunca usar item.Ordem, pois esse é um índice interno do sistema.
+  const itemCliente = normalizarItemClienteCdmLocal(item.ItemCliente || "");
+
+  if (!/^\d{5}$/.test(itemCliente)) {
+    alert(
+      "Não foi possível imprimir a etiqueta.\n\n" +
+      "O ItemCliente está vazio ou inválido para esta peça.\n" +
+      "SHC: " + String(item.OrdemCorte || "-") + "\n" +
+      "Valor recebido: " + String(item.ItemCliente == null ? "" : item.ItemCliente)
     );
-
-    document.getElementById("previewSection").classList.add("hidden");
-    renderImportedOrder(data.pedido,data.itens||[],data.alertasMateriais||[]);
-    currentPreview=null;
-    previewMaterials=[];
-    previewItems=[];
-    document.getElementById("pdfFile").value="";
-    loadRecentOrders();
-
-  }catch(error){
-    setMessage("Error: "+error.message,"error");
+    return;
   }
-}
+  const materialName = color === "grey" ? "GREY" : (color === "black" ? "BLACK" : "UNKNOWN");
+  const mainBg = color === "grey" ? "#D9D9D9" : (color === "black" ? "#000000" : "#F59E0B");
+  const mainFg = color === "grey" ? "#000000" : (color === "black" ? "#FFFFFF" : "#111827");
+  const materialCellBg = color === "grey" ? "#FFFFFF" : "#000000";
+  const materialCellFg = color === "grey" ? "#000000" : "#FFFFFF";
+  const thickness = String(item.Espessura || "");
+  const comp = String(item.Comprimento || "");
+  const larg = String(item.Largura || "");
+  const qtd = String(item.Quantidade || "");
+  const dimText = comp + " x " + larg;
+  const qrTextoCdm = getQrTextoCdmFromItem(item);
+  const qrUrlCdm = getQrUrlCdmFromItem(item);
 
-async function cancelCurrentPreview(silent){
-  try{
-    if(!currentPreview||!currentPreview.previewId){
-      resetPreviewUi();
-      return;
-    }
+  let svgLabel = `<svg
+   width="62mm"
+   height="62mm"
+   viewBox="0 0 620 620"
+   version="1.1"
+   id="svg27"
+   sodipodi:docname="etiqueta_CDM_62x62_base.svg"
+   inkscape:version="1.4.4 (dcaf3e7, 2026-05-05)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview27"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:document-units="mm"
+     inkscape:zoom="4.835047"
+     inkscape:cx="78.179178"
+     inkscape:cy="99.171735"
+     inkscape:window-width="2560"
+     inkscape:window-height="1351"
+     inkscape:window-x="-9"
+     inkscape:window-y="-9"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="g27" />
+  <defs
+     id="defs1">
+    <marker
+       id="arrow-dim"
+       markerWidth="8"
+       markerHeight="8"
+       refX="4"
+       refY="4"
+       orient="auto-start-reverse">
+      <path
+         d="M0,0 L8,4 L0,8 Z"
+         fill="#000"
+         id="path1" />
+    </marker>
+    <style
+       id="style1">
+      .label { font-family: Arial, Helvetica, sans-serif; }
+      .small { font-size: 23px; font-weight: 900; }
+      .topValue { font-size: 62px; font-weight: 900; }
+      .code { font-size: 82px; font-weight: 900; fill: #fff; }
+      .cdm { font-size: 37px; font-weight: 900; fill: #fff; }
+      .material { font-size: 63px; font-weight: 900; fill: #fff; }
+      .thickness { font-size: 70px; font-weight: 900; }
+      .unit { font-size: 36px; font-weight: 900; }
+      .dimTitle { font-size: 22px; font-weight: 900; }
+      .dimValue { font-size: 62px; font-weight: 900; }
+      .qty { font-size: 56px; font-weight: 900; }
+      .pcs { font-size: 24px; font-weight: 900; }
+      .date { font-size: 42px; font-weight: 900; }
+      .dimText { font-size: 22px; font-weight: 900; }
+    </style>
+    <marker
+       id="arrow-dim-7"
+       markerWidth="8"
+       markerHeight="8"
+       refX="4"
+       refY="4"
+       orient="auto-start-reverse">
+      <path
+         d="M 0,0 8,4 0,8 Z"
+         fill="#000000"
+         id="path1-1" />
+    </marker>
+    <marker
+       id="marker2"
+       markerWidth="8"
+       markerHeight="8"
+       refX="4"
+       refY="4"
+       orient="auto-start-reverse">
+      <path
+         d="M 0,0 8,4 0,8 Z"
+         fill="#000000"
+         id="path2" />
+    </marker>
+  </defs>
+  <g
+     class="label"
+     id="g27">
+    <!-- Outer frame -->
+    <rect
+       x="9"
+       y="9"
+       width="602"
+       height="602"
+       rx="11"
+       ry="11"
+       fill="#fff"
+       stroke="#000"
+       stroke-width="3.5"
+       id="rect1" />
+    <!-- Row separators -->
+    <line
+       x1="9"
+       y1="114"
+       x2="611"
+       y2="114"
+       stroke="#000"
+       stroke-width="3.5"
+       id="line1" />
+    <line
+       x1="9"
+       y1="239"
+       x2="611"
+       y2="239"
+       stroke="#000"
+       stroke-width="3.5"
+       id="line2" />
+    <line
+       x1="9"
+       y1="349"
+       x2="611"
+       y2="349"
+       stroke="#000"
+       stroke-width="3.5"
+       id="line3" />
+    <line
+       x1="7.3583407"
+       y1="515.35834"
+       x2="609.35834"
+       y2="515.35834"
+       stroke="#000000"
+       stroke-width="3.5"
+       id="line4" />
+    <!-- Top columns -->
+    <line
+       x1="310"
+       y1="9"
+       x2="310"
+       y2="114"
+       stroke="#000"
+       stroke-width="3.5"
+       id="line5" />
+    <text
+       x="26"
+       y="43"
+       class="small"
+       id="text5">ORDER</text>
+    <text
+       x="26"
+       y="99"
+       class="topValue"
+       id="text6">008336</text>
+    <text
+       x="327"
+       y="43"
+       class="small"
+       id="text7">ITEM</text>
+    <text
+       x="327"
+       y="99"
+       class="topValue"
+       id="text8">00010</text>
+    <!-- Code row -->
+    <rect
+       x="18"
+       y="124"
+       width="86"
+       height="105"
+       fill="#000"
+       id="rect8" />
+    <text
+       x="68.713501"
+       y="167.83766"
+       text-anchor="middle"
+       class="cdm"
+       id="text9"
+       transform="scale(0.8841568,1.1310211)"
+       style="stroke-width:0.281604">CDM</text>
+    <rect
+       x="112"
+       y="124"
+       width="487"
+       height="105"
+       rx="10"
+       ry="10"
+       fill="#000"
+       stroke="#000"
+       stroke-width="2.6"
+       stroke-dasharray="7 5"
+       id="rect9" />
+    <text
+       x="356"
+       y="206"
+       text-anchor="middle"
+       class="code"
+       id="text10">ZU68910</text>
+    <!-- Material row -->
+    <rect
+       x="9"
+       y="239"
+       width="301.88348"
+       height="110"
+       fill="#000000"
+       id="rect10"
+       style="stroke-width:0.945064" />
+    <line
+       x1="310.88348"
+       y1="239"
+       x2="310.88348"
+       y2="349"
+       stroke="#000000"
+       stroke-width="3.5"
+       id="line10" />
+    <text
+       x="25"
+       y="272"
+       class="small"
+       fill="#fff"
+       id="text11">MATERIAL</text>
+    <text
+       x="25"
+       y="333"
+       class="material"
+       id="text12">BLACK</text>
+    <text
+       x="396.73874"
+       y="265.43335"
+       class="small"
+       id="text13">THICKNESS</text>
+    <text
+       x="365"
+       y="333.54721"
+       class="thickness"
+       id="text14">10 <tspan
+   class="unit"
+   id="tspan13">mm</tspan></text>
+    <!-- Dimensions row -->
+    <line
+       x1="310.5278"
+       y1="348.45279"
+       x2="310.5278"
+       y2="516.45276"
+       stroke="#000000"
+       stroke-width="3.5"
+       id="line14" />
+    <text
+       x="52.360989"
+       y="370.50839"
+       class="dimTitle"
+       id="text15">DIMENSIONS (mm)</text>
+    <text
+       x="27.736099"
+       y="425.33627"
+       class="dimValue"
+       id="text16"
+       style="font-weight:900;font-size:62px"><tspan
+         style="font-style:normal;font-variant:normal;font-weight:900;font-stretch:normal;font-size:49.3889px;font-family:Arial, Helvetica, sans-serif;-inkscape-font-specification:'Arial, Helvetica, sans-serif, Heavy';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal"
+         id="tspan27">420 x 220</tspan></text>
+    <!-- Technical drawing -->
+    <g
+       transform="matrix(1.0565348,0,0,0.82020652,84.091374,428.53324)"
+       id="g23">
+      <polygon
+         points="100,24 121,15 45,15 24,24 "
+         fill="#f2f2f2"
+         stroke="#000000"
+         stroke-width="2"
+         id="polygon16"
+         transform="matrix(1.2765462,0,0,0.950184,-29.581815,0.79488954)" />
+      <polygon
+         points="121,38 100,47 100,24 121,15 "
+         fill="#dddddd"
+         stroke="#000000"
+         stroke-width="2"
+         id="polygon17"
+         transform="matrix(1.1692851,0,0,0.9829883,-17.003183,0.34013217)" />
+      <polygon
+         points="24,24 100,24 100,47 24,47 "
+         fill="#e9e9e9"
+         stroke="#000000"
+         stroke-width="2"
+         id="polygon18"
+         transform="matrix(1.2935809,0,0,1.0071233,-29.499456,-0.47353204)" />
+      <line
+         x1="1.4051187"
+         y1="48.646954"
+         x2="1.4051187"
+         y2="70.646957"
+         stroke="#000000"
+         stroke-width="1.5"
+         id="line19" />
+      <line
+         x1="100"
+         y1="49"
+         x2="100"
+         y2="71"
+         stroke="#000000"
+         stroke-width="1.5"
+         id="line20" />
+      <line
+         x1="125.63697"
+         y1="39.9758"
+         x2="125.63697"
+         y2="61.9758"
+         stroke="#000000"
+         stroke-width="1.5"
+         id="line20-5" />
+      <text
+         x="51.408649"
+         y="88.47229"
+         text-anchor="middle"
+         class="dimText"
+         id="text20">420</text>
+      <line
+         x1="122.5508"
+         y1="56.051987"
+         x2="103.53309"
+         y2="64.274101"
+         stroke="#000000"
+         stroke-width="0.87141"
+         marker-start="url(#arrow-dim)"
+         marker-end="url(#arrow-dim)"
+         id="line21"
+         inkscape:transform-center-x="-6.6720213"
+         inkscape:transform-center-y="-8.4858384" />
+      <line
+         x1="94.536369"
+         y1="66.58493"
+         x2="4.6016779"
+         y2="66.652245"
+         stroke="#000000"
+         stroke-width="0.819758"
+         marker-start="url(#arrow-dim-7)"
+         marker-end="url(#arrow-dim-7)"
+         id="line21-5"
+         inkscape:transform-center-x="-40.844712"
+         inkscape:transform-center-y="-1.0787618"
+         style="marker-start:url(#arrow-dim-7);marker-end:url(#arrow-dim-7)" />
+      <text
+         x="112.10942"
+         y="81.044571"
+         class="dimText"
+         id="text23"
+         inkscape:transform-center-x="-22.98323"
+         inkscape:transform-center-y="-70.59135">220</text>
+    </g>
+    <!-- QR Code cell: below THICKNESS and above DATE -->
+    <g id="qr_code_cell" transform="translate(0,0)">
+      <rect
+         id="qr_placeholder_bg"
+         x="391"
+         y="364"
+         width="128"
+         height="128"
+         fill="#ffffff"
+         stroke="#000000"
+         stroke-width="2.5" />
+      <image
+         id="qr_real_cdm"
+         href="__QR_URL_CDM__"
+         x="394"
+         y="367"
+         width="122"
+         height="122"
+         preserveAspectRatio="xMidYMid meet" />
+      <title id="qr_text_cdm">__QR_TEXT_CDM__</title>
+    </g>
 
-    if(!silent){
-      const proceed=confirm("Cancel this preview? No item will be imported.");
-      if(!proceed)return;
-    }
+    <!-- Bottom row -->
+    <line
+       x1="310"
+       y1="517"
+       x2="310"
+       y2="611"
+       stroke="#000"
+       stroke-width="3.5"
+       id="line24" />
+    <text
+       x="98.233009"
+       y="541.24451"
+       class="small"
+       id="text24">QUANTITY</text>
+    <text
+       x="155"
+       y="599"
+       text-anchor="middle"
+       class="qty"
+       id="text25">250 <tspan
+   class="pcs"
+   id="tspan24">PCS</tspan></text>
+    <text
+       x="427.14124"
+       y="539.0556"
+       class="small"
+       id="text26">DATE</text>
+    <text
+       x="460"
+       y="596"
+       text-anchor="middle"
+       class="date"
+       id="text27">16/06/2026</text>
+  </g>
+</svg>
+`;
 
-    await apiPost({
-      action:"cancelarPreviewImportacaoPedidoCdmPdf",
-      previewId:currentPreview.previewId
+  // Cor dinâmica nas caixas principais do SVG.
+  // Para GREY, troca fundo preto para cinza claro e texto branco para preto.
+  // Para BLACK, mantém fundo preto e texto branco.
+  if (color === "grey") {
+    svgLabel = svgLabel
+      // Troca os 3 primeiros retângulos pretos principais: CDM, código e MATERIAL
+      .replace(/<rect([^>]*?)fill="#000"([^>]*?)\/>/, '<rect$1fill="' + mainBg + '"$2/>')
+      .replace(/<rect([^>]*?)fill="#000"([^>]*?)\/>/, '<rect$1fill="' + mainBg + '"$2/>')
+      .replace(/<rect([^>]*?)fill="#000"([^>]*?)\/>/, '<rect$1fill="' + mainBg + '"$2/>')
+
+      // Estilos das classes de texto principais
+      .replace(/(\.code\s*\{[^}]*fill:\s*)#[0-9A-Fa-f]{3,6}([^}]*\})/, "$1" + mainFg + "$2")
+      .replace(/(\.cdm\s*\{[^}]*fill:\s*)#[0-9A-Fa-f]{3,6}([^}]*\})/, "$1" + mainFg + "$2")
+      .replace(/(\.material\s*\{[^}]*fill:\s*)#[0-9A-Fa-f]{3,6}([^}]*\})/, "$1" + mainFg + "$2")
+
+      // Texto MATERIAL inline, quando houver fill direto
+      .replace(/(<text[^>]*>MATERIAL<\/text>)/, function(m) {
+        return m.includes('fill=') ? m.replace(/fill="[^"]*"/, 'fill="' + mainFg + '"') : m.replace('<text', '<text fill="' + mainFg + '"');
+      })
+
+      // Célula THICKNESS: insere fundo cinza claro antes da linha divisória da célula
+      .replace(
+        /<line x1="347" y1="239" x2="347" y2="349" stroke="#000" stroke-width="3\.5"\/>/,
+        '<rect x="347" y="239" width="264" height="110" fill="' + mainBg + '"/><line x1="347" y1="239" x2="347" y2="349" stroke="#000" stroke-width="3.5"/>'
+      )
+
+      // Textos da célula THICKNESS em preto
+      .replace(/<text x="365" y="272" class="small">THICKNESS<\/text>/,
+        '<text x="365" y="272" class="small" fill="' + mainFg + '">THICKNESS</text>'
+      )
+      .replace(/<text x="365" y="333" class="thickness">/,
+        '<text x="365" y="333" class="thickness" fill="' + mainFg + '">'
+      );
+  }
+
+
+  /*
+   * Correção v42:
+   * A célula MATERIAL é o rect id="rect10" dentro do SVG.
+   * Para GREY, ela deve ficar branca, e os textos MATERIAL/GREY devem ficar pretos.
+   * Esta função não depende da ordem dos atributos no SVG.
+   */
+  function corrigirCelulaMaterialGrey_(svg) {
+    if (color !== "grey") return svg;
+
+    // rect10 = célula do material
+    svg = svg.replace(/<rect\b(?=[^>]*\bid="rect10\b)[^>]*>/, function(tag) {
+      if (/fill="/.test(tag)) {
+        return tag.replace(/fill="[^"]*"/, 'fill="' + materialCellBg + '"');
+      }
+      return tag.replace(/<rect\b/, '<rect fill="' + materialCellBg + '"');
     });
 
-    resetPreviewUi();
-    if(!silent)setMessage("Preview cancelled. Nothing was imported.","warning");
+    // text11 = título MATERIAL
+    svg = svg.replace(/<text\b(?=[^>]*\bid="text11\b)[^>]*>/, function(tag) {
+      if (/fill="/.test(tag)) {
+        return tag.replace(/fill="[^"]*"/, 'fill="' + materialCellFg + '"');
+      }
+      return tag.replace(/<text\b/, '<text fill="' + materialCellFg + '"');
+    });
 
-  }catch(error){
-    if(!silent)setMessage("Error: "+error.message,"error");
+    // text12 = valor BLACK/GREY
+    svg = svg.replace(/<text\b(?=[^>]*\bid="text12\b)[^>]*>/, function(tag) {
+      if (/fill="/.test(tag)) {
+        return tag.replace(/fill="[^"]*"/, 'fill="' + materialCellFg + '"');
+      }
+      return tag.replace(/<text\b/, '<text fill="' + materialCellFg + '"');
+    });
+
+    return svg;
   }
-}
 
-function resetPreviewUi(){
-  currentPreview=null;
-  previewMaterials=[];
-  previewItems=[];
-  document.getElementById("previewSection").classList.add("hidden");
-  document.getElementById("previewItemsBody").innerHTML="";
-}
+  /*
+   * Preenchimento robusto da etiqueta:
+   * cada valor é alterado pelo ID exato do elemento SVG.
+   *
+   * Isso impede colisões como:
+   * ITEM 10 ser substituído pela espessura 10;
+   * ITEM 20 ser substituído pela largura 20;
+   * ITEM 250 ser substituído pela quantidade 250.
+   */
+  function preencherEtiquetaSvgPorIds_(svg) {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(svg, "image/svg+xml");
+    const parseError = doc.querySelector("parsererror");
 
-function renderImportedOrder(pedido,itens,alertasServidor){
-  document.getElementById("importedSection").classList.remove("hidden");
+    if (parseError) {
+      throw new Error("Falha ao interpretar o SVG da etiqueta.");
+    }
 
-  document.getElementById("impOrder").textContent=pedido.OrdemCorte||pedido.ordemCorte||"-";
-  document.getElementById("impPo").textContent=pedido.NumeroPO||pedido.numeroPO||"-";
-  document.getElementById("impItems").textContent=itens.length;
+    const svgNs = "http://www.w3.org/2000/svg";
 
-  const totalPieces=itens.reduce((sum,item)=>sum+Number(item.Quantidade||item.quantidade||0),0);
-  document.getElementById("impPieces").textContent=totalPieces;
-  showMaterialAlarm(itens,alertasServidor||[]);
+    function setText(id, value) {
+      const element = doc.getElementById(id);
+      if (!element) {
+        throw new Error("Elemento SVG não encontrado: " + id);
+      }
+      element.textContent = String(value == null ? "" : value);
+    }
 
-  const body=document.getElementById("importedItemsBody");
-  body.innerHTML="";
+    function setTextWithTspan(id, value, tspanId, tspanClass, suffix) {
+      const element = doc.getElementById(id);
+      if (!element) {
+        throw new Error("Elemento SVG não encontrado: " + id);
+      }
 
-  itens.slice().sort((a,b)=>{
-    const ai=Number(String(a.ItemCliente||a.itemCliente||"").replace(/\D/g,""))||999999;
-    const bi=Number(String(b.ItemCliente||b.itemCliente||"").replace(/\D/g,""))||999999;
-    return ai-bi;
-  }).forEach(item=>{
-    const color=getCdmColor(item);
-    const safeMaterial=getSafeMaterial(item);
-    const row=document.createElement("tr");
-    const materialAlert=hasMaterialAlert(item);
-    const alertText=getMaterialAlert(item);
-    const cadastroStatus=String(item.MaterialCadastroStatus||item.materialCadastroStatus||"CADASTRADO");
-    const materialManual=cadastroStatus.toUpperCase()==="SELECIONADO_MANUALMENTE";
+      while (element.firstChild) {
+        element.removeChild(element.firstChild);
+      }
 
-    if(materialAlert) row.classList.add("row-material-alert");
+      element.appendChild(doc.createTextNode(String(value == null ? "" : value) + " "));
 
-    row.innerHTML = `
-      <td>${escapeHtml(item.ItemCliente||item.itemCliente||"")}</td>
-      <td>${escapeHtml(item.OrdemCorte||item.ordemCorte||pedido.OrdemCorte||"")}</td>
-      <td>${escapeHtml(item.NumeroPO||item.numeroPO||pedido.NumeroPO||"")}</td>
-      <td><span class="code-raw">${escapeHtml(getMaterialCodePdf(item))}</span></td>
-      <td class="${color==="grey"?"material-grey":"material-black"}">
-        ${escapeHtml(safeMaterial)}
-        ${alertText?`<div class="alert-detail">⚠ ${escapeHtml(alertText)}</div>`:""}
-      </td>
-      <td><span class="badge ${escapeHtml(color)}">${escapeHtml(color||"unknown")}</span></td>
-      <td>${escapeHtml(item.Espessura||item.espessura||"")} mm</td>
-      <td><span class="badge ${materialManual?"manual":materialAlert?"material-warning":"registered"}">${escapeHtml(materialManual?"MANUAL":materialAlert?cadastroStatus:"CADASTRADO")}</span></td>
-      <td>${escapeHtml(item.Largura||item.largura||"")} x ${escapeHtml(item.Comprimento||item.comprimento||"")}</td>
-      <td>${escapeHtml(item.Quantidade||item.quantidade||"")}</td>
-    `;
+      const tspan = doc.createElementNS(svgNs, "tspan");
+      tspan.setAttribute("id", tspanId);
+      tspan.setAttribute("class", tspanClass);
+      tspan.textContent = suffix;
+      element.appendChild(tspan);
+    }
 
-    body.appendChild(row);
-  });
-}
+    setText("text6", ordem);
+    setText("text8", itemCliente);
+    setText("text10", cdmText);
+    setText("text12", materialName);
 
-async function loadRecentOrders(){
-  try{
-    const data=await apiPost({action:"getPedidosCorteCdmRecentes",limit:30});
-    if(!data.ok) throw new Error(data.message || "Error loading recent orders.");
-    renderRecentOrders(data.items||[]);
-  }catch(error){
-    console.error(error);
+    setTextWithTspan("text14", thickness, "tspan13", "unit", "mm");
+
+    const dimensionText = doc.getElementById("tspan27") || doc.getElementById("text16");
+    if (!dimensionText) {
+      throw new Error("Elemento SVG da dimensão não encontrado.");
+    }
+    dimensionText.textContent = dimText;
+
+    setText("text20", comp);
+    setText("text23", larg);
+    setTextWithTspan("text25", qtd, "tspan24", "pcs", "PCS");
+    setText("text27", date);
+
+    const qrImage = doc.getElementById("qr_real_cdm");
+    if (!qrImage) {
+      throw new Error("Elemento SVG do QR não encontrado.");
+    }
+    qrImage.setAttribute("href", qrUrlCdm);
+    qrImage.setAttributeNS("http://www.w3.org/1999/xlink", "xlink:href", qrUrlCdm);
+
+    const qrTitle = doc.getElementById("qr_text_cdm");
+    if (qrTitle) {
+      qrTitle.textContent = qrTextoCdm;
+    }
+
+    return new XMLSerializer().serializeToString(doc.documentElement);
   }
-}
 
-function renderRecentOrders(items){
-  const body=document.getElementById("recentOrdersBody");
-  body.innerHTML="";
+  svgLabel = corrigirCelulaMaterialGrey_(svgLabel);
 
-  if(!items.length){
-    body.innerHTML='<tr><td colspan="9">No imported orders found.</td></tr>';
+  try {
+    svgLabel = preencherEtiquetaSvgPorIds_(svgLabel);
+  } catch (error) {
+    alert(
+      "Não foi possível montar a etiqueta.\\n\\n" +
+      (error && error.message ? error.message : String(error))
+    );
     return;
   }
 
-  items.forEach(order=>{
-    const row=document.createElement("tr");
-    const pdf=order.ArquivoPDF ? `<a href="${escapeHtml(order.ArquivoPDF)}" target="_blank">Open</a>` : "";
+  const labelHtml = `<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<title>Etiqueta CDM SVG</title>
+<style>
+@page{size:62mm 62mm;margin:0}
+*{
+  box-sizing:border-box;
+  -webkit-print-color-adjust:exact!important;
+  print-color-adjust:exact!important;
+}
+html,body{
+  margin:0!important;
+  padding:0!important;
+  width:62mm!important;
+  height:62mm!important;
+  overflow:hidden!important;
+  background:white!important;
+}
+.label-svg-page{
+  width:62mm!important;
+  height:62mm!important;
+  margin:0!important;
+  padding:0!important;
+  overflow:hidden!important;
+}
+.label-svg-page svg{
+  width:62mm!important;
+  height:62mm!important;
+  display:block!important;
+}
+@media print{
+  @page{size:62mm 62mm;margin:0}
+  html,body{
+    width:62mm!important;
+    height:62mm!important;
+    margin:0!important;
+    padding:0!important;
+    overflow:hidden!important;
+  }
+  .label-svg-page{
+    width:62mm!important;
+    height:62mm!important;
+    margin:0!important;
+    padding:0!important;
+    overflow:hidden!important;
+  }
+}
+</style>
+</head>
+<body>
+<div class="label-svg-page">
+${svgLabel}
+</div>
+<script>window.onload=function(){setTimeout(function(){window.print();},250)}<\/script>
+</body>
+</html>`;
 
-    const totalAlerts=Number(order.TotalAlertasMaterial||0);
-    if(totalAlerts) row.classList.add("order-material-alert");
-
-    row.innerHTML = `
-      <td>${escapeHtml(order.OrdemCorte||"")}</td>
-      <td>${escapeHtml(order.NumeroPO||"")}</td>
-      <td>${escapeHtml(order.Status||"")}</td>
-      <td>${totalAlerts?`<span class="badge material-warning">⚠ ${totalAlerts}</span>`:`<span class="badge registered">OK</span>`}</td>
-      <td>${escapeHtml(order.TotalItens||"")}</td>
-      <td>${escapeHtml(order.TotalPecas||"")}</td>
-      <td>${escapeHtml(formatDate(order.CriadoEm))}</td>
-      <td>${escapeHtml(order.CriadoPor||"")}</td>
-      <td>${pdf}</td>
-    `;
-    body.appendChild(row);
-  });
+  const w = window.open("", "_blank", "width=700,height=700");
+  if (!w) { alert("O navegador bloqueou a janela de impressão. Permita pop-ups para este site."); return; }
+  w.document.open();
+  w.document.write(labelHtml);
+  w.document.close();
 }
 
-function openSawPanel(){
-  window.open("painel_cdm_com_encerrados.html","_blank");
+async function confirmDone(idItem) {
+  const item = allItems.find(i => i.IDItem === idItem);
+  if (!item) return;
+
+  const ok = confirm("Confirmar corte?\n\nItem: " + (item.ItemCliente || "-") + "\n" + item.OrdemCorte + "\n" + String(item.Cor || "").toUpperCase() + " " + item.Espessura + " mm\n" + item.Largura + " x " + item.Comprimento + "\nQtd " + item.Quantidade);
+  if (!ok) return;
+
+  try {
+    const data = await apiPost({ action:"marcarItemCdmCortado", idItem:idItem, userEmail:"Operador Serra" });
+    if (!data.ok) throw new Error(data.message || "Error confirming cut.");
+
+    allItems = allItems.filter(i => i.IDItem !== idItem);
+    orders = groupOrders(allItems);
+
+    const mode = getCurrentMode();
+    if (mode === "po" && selectedOrder) {
+      await loadSelectedOrderItems(false);
+    } else if (mode === "list") {
+      applyGlobalFilters();
+    } else {
+      showOrders();
+    }
+
+    setTimeout(() => loadAll(false), 500);
+  } catch (error) {
+    showError("Erro ao confirmar corte: " + error.message);
+  }
 }
 
-window.addEventListener("load",async()=>{
-  const ready=await testBackend(false);
-  if(ready)loadRecentOrders();
-});
+function orderStillExists(ordem) { return orders.some(order => order.OrdemCorte === ordem); }
+
+function start() {
+  updateClock();
+  loadAll(true);
+  setInterval(updateClock, 1000);
+  setInterval(() => loadAll(false), 15000);
+}
+
+window.addEventListener("load", start);
 </script>
 </body>
 </html>
