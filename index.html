@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CDM Cutting Orders</title>
+<title>CDM Cutting Orders v26 Preview — Fixed API URL</title>
 <style>
 *{box-sizing:border-box}
 body{margin:0;font-family:Arial,Helvetica,sans-serif;background:#eef3f9;color:#0f172a}
@@ -18,7 +18,7 @@ label{display:block;font-weight:800;font-size:18px;margin:14px 0 8px}
 input[type=file],input[type=email],input[type=text]{width:100%;border:1px solid #cbd5e1;border-radius:16px;padding:14px 18px;font-size:22px;background:white}
 button{border:0;border-radius:16px;padding:16px 22px;font-size:20px;font-weight:900;cursor:pointer}
 .btn-primary{background:#2563eb;color:white}.btn-dark{background:#111827;color:white}.btn-light{background:#e8eef7;color:#1e40af}
-.message{margin-top:16px;font-weight:900;font-size:18px}.message.error{color:#dc2626}.message.ok{color:#16a34a}
+.message{margin-top:16px;font-weight:900;font-size:18px}.message.error{color:#dc2626}.message.ok{color:#16a34a}.message.warning{color:#92400e}
 .cards{display:grid;grid-template-columns:repeat(4,minmax(220px,1fr));gap:14px;margin-bottom:16px}
 .info-box{border:1px solid #d7e1ef;background:#f8fafc;border-radius:20px;padding:18px}.info-label{font-size:16px;font-weight:900;color:#64748b}.info-value{margin-top:8px;font-size:30px;font-weight:900}
 .table-wrap{overflow:auto;border:1px solid #d7e1ef;border-radius:18px}
@@ -28,6 +28,32 @@ th{background:#f8fafc;font-weight:900}tr:last-child td{border-bottom:0}
 .badge{display:inline-block;border-radius:999px;padding:6px 12px;font-weight:900;text-transform:uppercase}
 .badge.black{background:#000;color:#fff}.badge.grey{background:#d1d5db;color:#000}
 .material-black{color:#111827;font-weight:800}.material-grey{color:#4b5563;font-weight:800}
+
+.material-alert-box{margin:0 0 18px;background:#ffedd5;border:4px solid #f97316;color:#7c2d12;border-radius:20px;padding:18px 20px;font-size:18px;font-weight:900;box-shadow:0 8px 22px rgba(249,115,22,.18)}
+.material-alert-box h3{margin:0 0 10px;font-size:25px}
+.material-alert-box ul{margin:8px 0 0;padding-left:24px}
+.row-material-alert{background:#fff7ed!important;outline:3px solid #fb923c;outline-offset:-3px}
+.badge.material-warning{background:#f97316;color:#fff}
+.badge.registered{background:#dcfce7;color:#166534}
+.alert-detail{font-size:14px;color:#9a3412;font-weight:900;margin-top:6px;line-height:1.3}
+.code-raw{font-family:Consolas,monospace;font-size:18px;font-weight:900}
+.order-material-alert{background:#fff7ed}
+
+.preview-toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:14px 0}
+.preview-summary{display:grid;grid-template-columns:repeat(4,minmax(170px,1fr));gap:12px;margin:14px 0}
+.preview-summary .info-value{font-size:25px}
+.preview-table{min-width:1500px}
+.preview-table th:first-child,.preview-table td:first-child{position:sticky;left:0;background:inherit;z-index:2}
+.preview-check{width:24px;height:24px;cursor:pointer}
+.material-choice{min-width:330px;border:2px solid #cbd5e1;border-radius:12px;padding:9px 10px;font-size:15px;background:#fff}
+.row-excluded{opacity:.48;background:#e5e7eb!important;text-decoration:line-through}
+.row-material-corrected{background:#eff6ff!important;outline:3px solid #3b82f6;outline-offset:-3px}
+.badge.manual{background:#dbeafe;color:#1d4ed8}
+.preview-footer{position:sticky;bottom:0;background:rgba(255,255,255,.97);border-top:2px solid #cbd5e1;margin:18px -24px -24px;padding:16px 24px;display:flex;justify-content:space-between;align-items:center;gap:14px;box-shadow:0 -8px 20px rgba(15,23,42,.08)}
+.preview-footer-actions{display:flex;gap:10px;flex-wrap:wrap}
+.preview-warning{background:#fff7ed;border:3px solid #f97316;color:#7c2d12;border-radius:18px;padding:16px;font-weight:900;margin:14px 0}
+@media(max-width:1000px){.preview-summary{grid-template-columns:1fr 1fr}.preview-footer{position:static;margin:18px 0 0}}
+
 .hidden{display:none!important}
 @media(max-width:1000px){.header{flex-direction:column;align-items:flex-start}.cards{grid-template-columns:1fr 1fr}}
 </style>
@@ -44,7 +70,6 @@ th{background:#f8fafc;font-weight:900}tr:last-child td{border-bottom:0}
       <button class="btn-light" onclick="loadRecentOrders()">Refresh</button>
     </div>
   </div>
-
   <section class="card">
     <h2>Import new PO PDF</h2>
     <label>PDF file</label>
@@ -52,9 +77,54 @@ th{background:#f8fafc;font-weight:900}tr:last-child td{border-bottom:0}
     <label>User / email</label>
     <input id="userEmail" type="email" placeholder="your.name@company.com">
     <div style="margin-top:18px;">
-      <button class="btn-primary" onclick="importPdf()">Import PDF</button>
+      <button class="btn-primary" onclick="preparePdfPreview()">Read PDF and review</button>
     </div>
     <div id="importMessage" class="message"></div>
+  </section>
+
+
+  <section id="previewSection" class="card hidden">
+    <h2>Review before import</h2>
+    <div class="cards">
+      <div class="info-box"><div class="info-label">Cutting order</div><div id="prevOrder" class="info-value">-</div></div>
+      <div class="info-box"><div class="info-label">PO</div><div id="prevPo" class="info-value">-</div></div>
+      <div class="info-box"><div class="info-label">PDF items</div><div id="prevPdfItems" class="info-value">-</div></div>
+      <div class="info-box"><div class="info-label">PDF pieces</div><div id="prevPdfPieces" class="info-value">-</div></div>
+    </div>
+
+    <div id="previewMaterialAlertBox" class="material-alert-box hidden"></div>
+
+    <div class="preview-toolbar">
+      <button class="btn-light" onclick="selectAllPreviewItems(true)">Select all</button>
+      <button class="btn-light" onclick="selectAllPreviewItems(false)">Deselect all</button>
+      <span style="font-weight:900;color:#475569">All items are selected by default. Uncheck only what must not be imported.</span>
+    </div>
+
+    <div class="preview-summary">
+      <div class="info-box"><div class="info-label">Selected items</div><div id="prevSelectedItems" class="info-value">0</div></div>
+      <div class="info-box"><div class="info-label">Selected pieces</div><div id="prevSelectedPieces" class="info-value">0</div></div>
+      <div class="info-box"><div class="info-label">Excluded items</div><div id="prevExcludedItems" class="info-value">0</div></div>
+      <div class="info-box"><div class="info-label">Unresolved warnings</div><div id="prevWarnings" class="info-value">0</div></div>
+    </div>
+
+    <div class="table-wrap">
+      <table class="preview-table">
+        <thead>
+          <tr>
+            <th>Import</th><th>Item</th><th>Order</th><th>PO</th><th>PDF code</th><th>Parsed material</th><th>Color</th><th>Thickness</th><th>Measure</th><th>Qty</th><th>Validation</th><th>Material decision</th>
+          </tr>
+        </thead>
+        <tbody id="previewItemsBody"></tbody>
+      </table>
+    </div>
+
+    <div class="preview-footer">
+      <div id="previewDecisionText" style="font-weight:900;color:#334155">Review all items before importing.</div>
+      <div class="preview-footer-actions">
+        <button class="btn-light" onclick="cancelCurrentPreview()">Cancel - do not import</button>
+        <button class="btn-primary" onclick="confirmCurrentPreview()">Confirm selected items</button>
+      </div>
+    </div>
   </section>
 
   <section id="importedSection" class="card hidden">
@@ -65,11 +135,12 @@ th{background:#f8fafc;font-weight:900}tr:last-child td{border-bottom:0}
       <div class="info-box"><div class="info-label">Items</div><div id="impItems" class="info-value">-</div></div>
       <div class="info-box"><div class="info-label">Pieces</div><div id="impPieces" class="info-value">-</div></div>
     </div>
+    <div id="materialAlertBox" class="material-alert-box hidden"></div>
     <div class="table-wrap">
       <table>
         <thead>
           <tr>
-            <th>Item</th><th>Order</th><th>PO</th><th>Material</th><th>Color</th><th>Thickness</th><th>Measure</th><th>Qty</th>
+            <th>Item</th><th>Order</th><th>PO</th><th>PDF code</th><th>Material</th><th>Color</th><th>Thickness</th><th>Cadastro</th><th>Measure</th><th>Qty</th>
           </tr>
         </thead>
         <tbody id="importedItemsBody"></tbody>
@@ -83,7 +154,7 @@ th{background:#f8fafc;font-weight:900}tr:last-child td{border-bottom:0}
       <table>
         <thead>
           <tr>
-            <th>Cutting order</th><th>PO</th><th>Status</th><th>Items</th><th>Pieces</th><th>Created at</th><th>Created by</th><th>PDF</th>
+            <th>Cutting order</th><th>PO</th><th>Status</th><th>Material</th><th>Items</th><th>Pieces</th><th>Created at</th><th>Created by</th><th>PDF</th>
           </tr>
         </thead>
         <tbody id="recentOrdersBody"></tbody>
@@ -93,13 +164,80 @@ th{background:#f8fafc;font-weight:900}tr:last-child td{border-bottom:0}
 </div>
 
 <script>
-const API_URL = "https://script.google.com/macros/s/AKfycbx6O29a_NJC7s79krRhpivH745asbKCewJsa0r8-a8SQ3YWeWT8tCBHixAXjUfJiUci/exec";
+/************************************************************
+ * API DO APPS SCRIPT
+ *
+ * Após cada novo deploy, substitua somente a URL abaixo pela
+ * URL atual terminada em /exec.
+ ************************************************************/
+const API_URL = "https://script.google.com/macros/s/AKfycbz5IXyXNmrgcxtw_Z73Nr-oUKf9Zc-u4jizjprQ1Jfn3kMroZecAKAphz5dKhLQthsT/exec";
+
+let currentPreview = null;
+let previewMaterials = [];
+let previewItems = [];
+let backendInfo = null;
+
+function getApiUrl(){
+  const value=String(API_URL||"").trim().replace(/[?#].*$/,"").replace(/\/$/,"");
+  if(!value || !/^https:\/\/script\.google\.com\/macros\/s\//i.test(value)){
+    throw new Error("Replace the API_URL constant inside this HTML with the current Apps Script /exec URL.");
+  }
+  return value;
+}
 
 async function apiPost(payload){
-  const res = await fetch(API_URL,{method:"POST",body:JSON.stringify(payload)});
-  const raw = await res.text();
-  try{return JSON.parse(raw);}
-  catch(error){throw new Error("Server response was not valid JSON: " + raw.slice(0,200));}
+  const apiUrl=getApiUrl();
+  let res;
+  try{
+    res=await fetch(apiUrl,{
+      method:"POST",
+      body:JSON.stringify(payload),
+      headers:{"Content-Type":"text/plain;charset=utf-8"}
+    });
+  }catch(error){
+    throw new Error("Could not connect to the Apps Script Web App. Check the URL and deployment access.");
+  }
+
+  const raw=await res.text();
+  let data;
+  try{data=JSON.parse(raw);}
+  catch(error){throw new Error("Server response was not valid JSON: "+raw.slice(0,200));}
+
+  if(data && data.ok===false && /invalid post action/i.test(String(data.message||""))){
+    throw new Error("The API_URL inside this HTML points to an older backend deployment. Update the Apps Script deployment and replace the API_URL constant if the /exec URL changed.");
+  }
+
+  return data;
+}
+
+async function testBackend(showMessage){
+  try{
+    if(showMessage)setMessage("Testing backend...","");
+    const data=await apiPost({action:"getCorteCdmBackendVersion"});
+    if(!data || !data.ok)throw new Error(data&&data.message?data.message:"Backend test failed.");
+
+    const version=String(data.version||"");
+    const features=data.features||{};
+    const previewSupported=features.previewImportacao===true || /v(49|50|5[1-9]|[6-9][0-9])/i.test(version);
+
+    backendInfo={version,features,previewSupported};
+
+    if(!previewSupported){
+      throw new Error("The deployed backend "+(version||"is outdated")+" and does not support PDF preview. Update the Apps Script deployment.");
+    }
+
+    if(showMessage)setMessage("Backend connected: "+version+".","ok");
+    return true;
+  }catch(error){
+    backendInfo=null;
+    if(showMessage)setMessage("Error: "+(error.message||String(error)),"error");
+    return false;
+  }
+}
+
+async function ensurePreviewBackend(){
+  if(backendInfo && backendInfo.previewSupported)return true;
+  return await testBackend(false);
 }
 
 function escapeHtml(text){
@@ -117,6 +255,43 @@ function setMessage(text,type){
   const el=document.getElementById("importMessage");
   el.textContent=text||"";
   el.className="message "+(type||"");
+}
+
+
+function hasMaterialAlert(item){
+  const status=String(item.MaterialCadastroStatus||item.materialCadastroStatus||"").trim().toUpperCase();
+  const alert=String(item.AlertaMaterial||item.alertaMaterial||"").trim();
+  const accepted=["CADASTRADO","OK","SELECIONADO_MANUALMENTE"];
+  return !!alert || (status && !accepted.includes(status));
+}
+
+function getMaterialAlert(item){
+  return String(item.AlertaMaterial||item.alertaMaterial||"").trim();
+}
+
+function getMaterialCodePdf(item){
+  return String(item.CodigoMaterialPDF||item.codigoMaterialPDF||item.CodigoCliente||item.codigoCliente||"").trim();
+}
+
+function showMaterialAlarm(itens,alertasServidor){
+  const box=document.getElementById("materialAlertBox");
+  const alertItems=(itens||[]).filter(hasMaterialAlert);
+  const messages=(alertasServidor&&alertasServidor.length)
+    ? alertasServidor
+    : alertItems.map(item=>"Item "+(item.ItemCliente||item.itemCliente||"")+": "+getMaterialAlert(item));
+
+  if(!messages.length){
+    box.classList.add("hidden");
+    box.innerHTML="";
+    return;
+  }
+
+  box.classList.remove("hidden");
+  box.innerHTML=`
+    <h3>⚠ MATÉRIA-PRIMA NÃO CADASTRADA</h3>
+    <div>O pedido foi importado, mas ${messages.length} item(ns) precisam de verificação.</div>
+    <ul>${messages.map(msg=>`<li>${escapeHtml(msg)}</li>`).join("")}</ul>
+  `;
 }
 
 /************************************************************
@@ -145,6 +320,12 @@ function getCdmSerie(color){
 }
 
 function getSafeMaterial(item){
+  if(hasMaterialAlert(item)){
+    const original=String(item.MaterialOriginalPDF||item.materialOriginalPDF||"").trim();
+    const material=String(item.Material||item.material||"").trim();
+    return original || material || ("CDM "+getMaterialCodePdf(item));
+  }
+
   const color=getCdmColor(item);
   const serie=getCdmSerie(color);
   const esp=item.Espessura||item.espessura||"";
@@ -161,8 +342,14 @@ function fileToBase64(file){
   });
 }
 
-async function importPdf(){
+async function preparePdfPreview(){
   try{
+    const backendReady=await ensurePreviewBackend();
+    if(!backendReady){
+      setMessage("Error: The backend in API_URL does not support PDF review. Update the Apps Script deployment and replace API_URL if the /exec URL changed.","error");
+      return;
+    }
+
     const fileInput=document.getElementById("pdfFile");
     const email=document.getElementById("userEmail").value.trim();
 
@@ -171,22 +358,253 @@ async function importPdf(){
       return;
     }
 
+    if(currentPreview && currentPreview.previewId){
+      const proceed=confirm("There is already an open preview. Cancel it and read the new PDF?");
+      if(!proceed)return;
+      await cancelCurrentPreview(true);
+    }
+
     const file=fileInput.files[0];
-    setMessage("Importing PDF...","");
+    setMessage("Reading PDF and preparing preview...","");
 
     const base64=await fileToBase64(file);
-
     const data=await apiPost({
-      action:"importarPedidoCdmPdf",
+      action:"prepararImportacaoPedidoCdmPdf",
       filename:file.name,
-      base64:base64,
+      base64,
       userEmail:email
     });
 
-    if(!data.ok) throw new Error(data.message || "Import error.");
+    if(!data.ok)throw new Error(data.message||"Preview error.");
 
-    setMessage("PDF imported successfully.","ok");
-    renderImportedOrder(data.pedido,data.itens||[]);
+    currentPreview=data;
+    previewMaterials=data.materiaisCadastro||[];
+    previewItems=(data.itens||[]).map(item=>Object.assign({},item,{_importar:true,_materialCadastroID:""}));
+
+    renderImportPreview(data);
+    setMessage("PDF read. Review all items and confirm the import.","warning");
+    document.getElementById("previewSection").scrollIntoView({behavior:"smooth",block:"start"});
+
+  }catch(error){
+    setMessage("Error: "+error.message,"error");
+  }
+}
+
+function renderImportPreview(data){
+  document.getElementById("previewSection").classList.remove("hidden");
+  document.getElementById("importedSection").classList.add("hidden");
+
+  const pedido=data.pedido||{};
+  document.getElementById("prevOrder").textContent=pedido.OrdemCorte||"-";
+  document.getElementById("prevPo").textContent=pedido.NumeroPO||"-";
+  document.getElementById("prevPdfItems").textContent=data.totalItens||previewItems.length;
+  document.getElementById("prevPdfPieces").textContent=data.totalPecas||previewItems.reduce((s,i)=>s+Number(i.Quantidade||0),0);
+
+  showPreviewMaterialAlarm(previewItems);
+  renderPreviewRows();
+  updatePreviewSummary();
+}
+
+function showPreviewMaterialAlarm(items){
+  const box=document.getElementById("previewMaterialAlertBox");
+  const alerts=(items||[]).filter(item=>item._importar!==false && hasMaterialAlert(item) && !item._materialCadastroID);
+
+  if(!alerts.length){
+    box.classList.add("hidden");
+    box.innerHTML="";
+    return;
+  }
+
+  box.classList.remove("hidden");
+  box.innerHTML=`
+    <h3>⚠ MATERIAL REVIEW REQUIRED</h3>
+    <div>${alerts.length} item(s) contain a raw material that was not confirmed in the register.</div>
+    <div style="margin-top:8px">For each highlighted item you can:</div>
+    <ul>
+      <li>keep it selected and import it with the warning;</li>
+      <li>choose the correct registered raw material;</li>
+      <li>uncheck the item so it is not imported.</li>
+    </ul>
+  `;
+}
+
+function renderPreviewRows(){
+  const body=document.getElementById("previewItemsBody");
+  body.innerHTML="";
+
+  previewItems.slice().sort((a,b)=>{
+    const ai=Number(String(a.ItemCliente||"").replace(/\D/g,""))||999999;
+    const bi=Number(String(b.ItemCliente||"").replace(/\D/g,""))||999999;
+    return ai-bi;
+  }).forEach(item=>{
+    const row=document.createElement("tr");
+    const alert=hasMaterialAlert(item);
+    const selected=!!item._importar;
+    const manual=!!item._materialCadastroID;
+
+    row.dataset.previewItemId=item.PreviewItemID;
+    if(!selected)row.classList.add("row-excluded");
+    else if(manual)row.classList.add("row-material-corrected");
+    else if(alert)row.classList.add("row-material-alert");
+
+    const options=buildMaterialOptions(item);
+    const statusText=manual
+      ? "SELECTED MANUALLY"
+      : alert
+        ? (item.MaterialCadastroStatus||"WARNING")
+        : "REGISTERED";
+    const statusClass=manual?"manual":alert?"material-warning":"registered";
+
+    row.innerHTML=`
+      <td><input class="preview-check" type="checkbox" ${selected?"checked":""} onchange="togglePreviewItem('${escapeHtml(item.PreviewItemID)}',this.checked)"></td>
+      <td>${escapeHtml(item.ItemCliente||"")}</td>
+      <td>${escapeHtml(item.OrdemCorte||currentPreview.pedido.OrdemCorte||"")}</td>
+      <td>${escapeHtml(item.NumeroPO||currentPreview.pedido.NumeroPO||"")}</td>
+      <td><span class="code-raw">${escapeHtml(getMaterialCodePdf(item))}</span></td>
+      <td>
+        ${escapeHtml(getSafeMaterial(item))}
+        ${alert&&!manual?`<div class="alert-detail">⚠ ${escapeHtml(getMaterialAlert(item))}</div>`:""}
+      </td>
+      <td><span class="badge ${escapeHtml(getCdmColor(item))}">${escapeHtml(getCdmColor(item)||"unknown")}</span></td>
+      <td>${escapeHtml(item.Espessura||"")} mm</td>
+      <td>${escapeHtml(item.Largura||"")} x ${escapeHtml(item.Comprimento||"")}</td>
+      <td>${escapeHtml(item.Quantidade||"")}</td>
+      <td><span class="badge ${statusClass}">${escapeHtml(statusText)}</span></td>
+      <td>
+        <select class="material-choice" onchange="changePreviewMaterial('${escapeHtml(item.PreviewItemID)}',this.value)" ${selected?"":"disabled"}>
+          ${options}
+        </select>
+      </td>
+    `;
+
+    body.appendChild(row);
+  });
+}
+
+function buildMaterialOptions(item){
+  const alert=hasMaterialAlert(item);
+  const currentLabel=alert
+    ? "Import using PDF material and keep warning"
+    : "Use material already recognised";
+
+  let html=`<option value="" ${item._materialCadastroID?"":"selected"}>${escapeHtml(currentLabel)}</option>`;
+  const thickness=Number(String(item.Espessura||"").replace(",","."));
+  const sameThickness=previewMaterials.filter(material=>Number(material.Espessura)===thickness);
+
+  sameThickness.forEach(material=>{
+    const suggested=String(item.MaterialCadastroSugerido||"").includes(String(material.ID||""));
+    const selected=String(item._materialCadastroID||"")===String(material.ID||"");
+    const label=(suggested?"★ Suggested - ":"")+(material.Label||[material.ID,material.Codigo,material.Cor,material.Espessura+" mm",material.Descricao].filter(Boolean).join(" | "));
+    html+=`<option value="${escapeHtml(material.ID)}" ${selected?"selected":""}>${escapeHtml(label)}</option>`;
+  });
+
+  if(!sameThickness.length){
+    html+=`<option value="" disabled>No registered material with ${escapeHtml(item.Espessura||"")} mm</option>`;
+  }
+
+  return html;
+}
+
+function togglePreviewItem(previewItemId,checked){
+  const item=previewItems.find(row=>String(row.PreviewItemID)===String(previewItemId));
+  if(!item)return;
+  item._importar=!!checked;
+  renderPreviewRows();
+  updatePreviewSummary();
+}
+
+function changePreviewMaterial(previewItemId,materialCadastroID){
+  const item=previewItems.find(row=>String(row.PreviewItemID)===String(previewItemId));
+  if(!item)return;
+  item._materialCadastroID=String(materialCadastroID||"");
+  renderPreviewRows();
+  updatePreviewSummary();
+}
+
+function selectAllPreviewItems(selected){
+  previewItems.forEach(item=>item._importar=!!selected);
+  renderPreviewRows();
+  updatePreviewSummary();
+}
+
+function getPreviewSummary(){
+  const selected=previewItems.filter(item=>item._importar);
+  const excluded=previewItems.filter(item=>!item._importar);
+  const warnings=selected.filter(item=>hasMaterialAlert(item)&&!item._materialCadastroID);
+  const corrected=selected.filter(item=>!!item._materialCadastroID);
+
+  return{
+    selected,
+    excluded,
+    warnings,
+    corrected,
+    pieces:selected.reduce((sum,item)=>sum+Number(item.Quantidade||0),0)
+  };
+}
+
+function updatePreviewSummary(){
+  const summary=getPreviewSummary();
+  showPreviewMaterialAlarm(previewItems);
+  document.getElementById("prevSelectedItems").textContent=summary.selected.length;
+  document.getElementById("prevSelectedPieces").textContent=summary.pieces;
+  document.getElementById("prevExcludedItems").textContent=summary.excluded.length;
+  document.getElementById("prevWarnings").textContent=summary.warnings.length;
+
+  const parts=[
+    summary.selected.length+" item(s) selected",
+    summary.excluded.length+" excluded",
+    summary.corrected.length+" material correction(s)",
+    summary.warnings.length+" warning(s) kept"
+  ];
+  document.getElementById("previewDecisionText").textContent=parts.join(" • ");
+}
+
+async function confirmCurrentPreview(){
+  try{
+    if(!currentPreview||!currentPreview.previewId)throw new Error("No active preview.");
+
+    const summary=getPreviewSummary();
+    if(!summary.selected.length)throw new Error("Select at least one item to import.");
+
+    const warnings=[];
+    if(summary.excluded.length)warnings.push(summary.excluded.length+" item(s) will NOT be imported");
+    if(summary.warnings.length)warnings.push(summary.warnings.length+" material warning(s) will remain");
+
+    if(warnings.length){
+      const proceed=confirm("Please confirm:\n\n- "+warnings.join("\n- ")+"\n\nContinue with the import?");
+      if(!proceed)return;
+    }
+
+    setMessage("Confirming import...","");
+
+    const decisoes=previewItems.map(item=>({
+      PreviewItemID:item.PreviewItemID,
+      importar:!!item._importar,
+      materialCadastroID:item._materialCadastroID||""
+    }));
+
+    const data=await apiPost({
+      action:"confirmarImportacaoPedidoCdmPdf",
+      previewId:currentPreview.previewId,
+      userEmail:document.getElementById("userEmail").value.trim(),
+      decisoes
+    });
+
+    if(!data.ok)throw new Error(data.message||"Import confirmation error.");
+
+    setMessage(
+      data.totalAlertasMaterial
+        ? "PO imported with "+data.totalAlertasMaterial+" warning(s)."
+        : "PO imported successfully after review.",
+      data.totalAlertasMaterial?"warning":"ok"
+    );
+
+    document.getElementById("previewSection").classList.add("hidden");
+    renderImportedOrder(data.pedido,data.itens||[],data.alertasMateriais||[]);
+    currentPreview=null;
+    previewMaterials=[];
+    previewItems=[];
+    document.getElementById("pdfFile").value="";
     loadRecentOrders();
 
   }catch(error){
@@ -194,7 +612,40 @@ async function importPdf(){
   }
 }
 
-function renderImportedOrder(pedido,itens){
+async function cancelCurrentPreview(silent){
+  try{
+    if(!currentPreview||!currentPreview.previewId){
+      resetPreviewUi();
+      return;
+    }
+
+    if(!silent){
+      const proceed=confirm("Cancel this preview? No item will be imported.");
+      if(!proceed)return;
+    }
+
+    await apiPost({
+      action:"cancelarPreviewImportacaoPedidoCdmPdf",
+      previewId:currentPreview.previewId
+    });
+
+    resetPreviewUi();
+    if(!silent)setMessage("Preview cancelled. Nothing was imported.","warning");
+
+  }catch(error){
+    if(!silent)setMessage("Error: "+error.message,"error");
+  }
+}
+
+function resetPreviewUi(){
+  currentPreview=null;
+  previewMaterials=[];
+  previewItems=[];
+  document.getElementById("previewSection").classList.add("hidden");
+  document.getElementById("previewItemsBody").innerHTML="";
+}
+
+function renderImportedOrder(pedido,itens,alertasServidor){
   document.getElementById("importedSection").classList.remove("hidden");
 
   document.getElementById("impOrder").textContent=pedido.OrdemCorte||pedido.ordemCorte||"-";
@@ -203,6 +654,7 @@ function renderImportedOrder(pedido,itens){
 
   const totalPieces=itens.reduce((sum,item)=>sum+Number(item.Quantidade||item.quantidade||0),0);
   document.getElementById("impPieces").textContent=totalPieces;
+  showMaterialAlarm(itens,alertasServidor||[]);
 
   const body=document.getElementById("importedItemsBody");
   body.innerHTML="";
@@ -215,14 +667,25 @@ function renderImportedOrder(pedido,itens){
     const color=getCdmColor(item);
     const safeMaterial=getSafeMaterial(item);
     const row=document.createElement("tr");
+    const materialAlert=hasMaterialAlert(item);
+    const alertText=getMaterialAlert(item);
+    const cadastroStatus=String(item.MaterialCadastroStatus||item.materialCadastroStatus||"CADASTRADO");
+    const materialManual=cadastroStatus.toUpperCase()==="SELECIONADO_MANUALMENTE";
+
+    if(materialAlert) row.classList.add("row-material-alert");
 
     row.innerHTML = `
       <td>${escapeHtml(item.ItemCliente||item.itemCliente||"")}</td>
       <td>${escapeHtml(item.OrdemCorte||item.ordemCorte||pedido.OrdemCorte||"")}</td>
       <td>${escapeHtml(item.NumeroPO||item.numeroPO||pedido.NumeroPO||"")}</td>
-      <td class="${color==="grey"?"material-grey":"material-black"}">${escapeHtml(safeMaterial)}</td>
-      <td><span class="badge ${escapeHtml(color)}">${escapeHtml(color)}</span></td>
+      <td><span class="code-raw">${escapeHtml(getMaterialCodePdf(item))}</span></td>
+      <td class="${color==="grey"?"material-grey":"material-black"}">
+        ${escapeHtml(safeMaterial)}
+        ${alertText?`<div class="alert-detail">⚠ ${escapeHtml(alertText)}</div>`:""}
+      </td>
+      <td><span class="badge ${escapeHtml(color)}">${escapeHtml(color||"unknown")}</span></td>
       <td>${escapeHtml(item.Espessura||item.espessura||"")} mm</td>
+      <td><span class="badge ${materialManual?"manual":materialAlert?"material-warning":"registered"}">${escapeHtml(materialManual?"MANUAL":materialAlert?cadastroStatus:"CADASTRADO")}</span></td>
       <td>${escapeHtml(item.Largura||item.largura||"")} x ${escapeHtml(item.Comprimento||item.comprimento||"")}</td>
       <td>${escapeHtml(item.Quantidade||item.quantidade||"")}</td>
     `;
@@ -246,7 +709,7 @@ function renderRecentOrders(items){
   body.innerHTML="";
 
   if(!items.length){
-    body.innerHTML='<tr><td colspan="8">No imported orders found.</td></tr>';
+    body.innerHTML='<tr><td colspan="9">No imported orders found.</td></tr>';
     return;
   }
 
@@ -254,10 +717,14 @@ function renderRecentOrders(items){
     const row=document.createElement("tr");
     const pdf=order.ArquivoPDF ? `<a href="${escapeHtml(order.ArquivoPDF)}" target="_blank">Open</a>` : "";
 
+    const totalAlerts=Number(order.TotalAlertasMaterial||0);
+    if(totalAlerts) row.classList.add("order-material-alert");
+
     row.innerHTML = `
       <td>${escapeHtml(order.OrdemCorte||"")}</td>
       <td>${escapeHtml(order.NumeroPO||"")}</td>
       <td>${escapeHtml(order.Status||"")}</td>
+      <td>${totalAlerts?`<span class="badge material-warning">⚠ ${totalAlerts}</span>`:`<span class="badge registered">OK</span>`}</td>
       <td>${escapeHtml(order.TotalItens||"")}</td>
       <td>${escapeHtml(order.TotalPecas||"")}</td>
       <td>${escapeHtml(formatDate(order.CriadoEm))}</td>
@@ -272,7 +739,10 @@ function openSawPanel(){
   window.open("painel_cdm_com_encerrados.html","_blank");
 }
 
-window.addEventListener("load",()=>loadRecentOrders());
+window.addEventListener("load",async()=>{
+  const ready=await testBackend(false);
+  if(ready)loadRecentOrders();
+});
 </script>
 </body>
 </html>
