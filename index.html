@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CDM Cutting Orders v26 Preview — Fixed API URL</title>
+<title>CDM Cutting Orders v27 — Urgent items</title>
 <style>
 *{box-sizing:border-box}
 body{margin:0;font-family:Arial,Helvetica,sans-serif;background:#eef3f9;color:#0f172a}
@@ -40,11 +40,18 @@ th{background:#f8fafc;font-weight:900}tr:last-child td{border-bottom:0}
 .order-material-alert{background:#fff7ed}
 
 .preview-toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:14px 0}
-.preview-summary{display:grid;grid-template-columns:repeat(4,minmax(170px,1fr));gap:12px;margin:14px 0}
+.preview-summary{display:grid;grid-template-columns:repeat(6,minmax(150px,1fr));gap:12px;margin:14px 0}
 .preview-summary .info-value{font-size:25px}
 .preview-table{min-width:1500px}
 .preview-table th:first-child,.preview-table td:first-child{position:sticky;left:0;background:inherit;z-index:2}
 .preview-check{width:24px;height:24px;cursor:pointer}
+.preview-urgent-check{width:24px;height:24px;cursor:pointer;accent-color:#dc2626}
+.preview-urgent-check:disabled{cursor:not-allowed;opacity:.35}
+.row-urgent td:first-child{box-shadow:inset 7px 0 0 #dc2626}
+.row-urgent.row-excluded td:first-child{box-shadow:inset 7px 0 0 #94a3b8}
+.badge.urgent{background:#dc2626;color:#fff}
+.badge.normal{background:#e2e8f0;color:#334155}
+.order-urgent-preview{background:#fef2f2!important}
 .material-choice{min-width:330px;border:2px solid #cbd5e1;border-radius:12px;padding:9px 10px;font-size:15px;background:#fff}
 .row-excluded{opacity:.48;background:#e5e7eb!important;text-decoration:line-through}
 .row-material-corrected{background:#eff6ff!important;outline:3px solid #3b82f6;outline-offset:-3px}
@@ -103,6 +110,8 @@ th{background:#f8fafc;font-weight:900}tr:last-child td{border-bottom:0}
     <div class="preview-summary">
       <div class="info-box"><div class="info-label">Selected items</div><div id="prevSelectedItems" class="info-value">0</div></div>
       <div class="info-box"><div class="info-label">Selected pieces</div><div id="prevSelectedPieces" class="info-value">0</div></div>
+      <div class="info-box"><div class="info-label">Urgent items</div><div id="prevUrgentItems" class="info-value">0</div></div>
+      <div class="info-box"><div class="info-label">Urgent pieces</div><div id="prevUrgentPieces" class="info-value">0</div></div>
       <div class="info-box"><div class="info-label">Excluded items</div><div id="prevExcludedItems" class="info-value">0</div></div>
       <div class="info-box"><div class="info-label">Unresolved warnings</div><div id="prevWarnings" class="info-value">0</div></div>
     </div>
@@ -111,7 +120,7 @@ th{background:#f8fafc;font-weight:900}tr:last-child td{border-bottom:0}
       <table class="preview-table">
         <thead>
           <tr>
-            <th>Import</th><th>Item</th><th>Order</th><th>PO</th><th>PDF code</th><th>Parsed material</th><th>Color</th><th>Thickness</th><th>Measure</th><th>Qty</th><th>Validation</th><th>Material decision</th>
+            <th>Import</th><th>Urgent</th><th>Item</th><th>Order</th><th>PO</th><th>PDF code</th><th>Parsed material</th><th>Color</th><th>Thickness</th><th>Measure</th><th>Qty</th><th>Validation</th><th>Material decision</th>
           </tr>
         </thead>
         <tbody id="previewItemsBody"></tbody>
@@ -140,7 +149,7 @@ th{background:#f8fafc;font-weight:900}tr:last-child td{border-bottom:0}
       <table>
         <thead>
           <tr>
-            <th>Item</th><th>Order</th><th>PO</th><th>PDF code</th><th>Material</th><th>Color</th><th>Thickness</th><th>Cadastro</th><th>Measure</th><th>Qty</th>
+            <th>Priority</th><th>Item</th><th>Order</th><th>PO</th><th>PDF code</th><th>Material</th><th>Color</th><th>Thickness</th><th>Cadastro</th><th>Measure</th><th>Qty</th>
           </tr>
         </thead>
         <tbody id="importedItemsBody"></tbody>
@@ -154,7 +163,7 @@ th{background:#f8fafc;font-weight:900}tr:last-child td{border-bottom:0}
       <table>
         <thead>
           <tr>
-            <th>Cutting order</th><th>PO</th><th>Status</th><th>Material</th><th>Items</th><th>Pieces</th><th>Created at</th><th>Created by</th><th>PDF</th>
+            <th>Cutting order</th><th>PO</th><th>Status</th><th>Priority</th><th>Material</th><th>Items</th><th>Pieces</th><th>Created at</th><th>Created by</th><th>PDF</th>
           </tr>
         </thead>
         <tbody id="recentOrdersBody"></tbody>
@@ -170,7 +179,7 @@ th{background:#f8fafc;font-weight:900}tr:last-child td{border-bottom:0}
  * Após cada novo deploy, substitua somente a URL abaixo pela
  * URL atual terminada em /exec.
  ************************************************************/
-const API_URL = "https://script.google.com/macros/s/AKfycbz5IXyXNmrgcxtw_Z73Nr-oUKf9Zc-u4jizjprQ1Jfn3kMroZecAKAphz5dKhLQthsT/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbxZawbyH5IhJ1Sd2Vwc8Z2SZYzFq3lnucVCz4fN8lVymahJ5j6c4ElqgrvIt7lC3gcl/exec";
 
 let currentPreview = null;
 let previewMaterials = [];
@@ -219,11 +228,16 @@ async function testBackend(showMessage){
     const version=String(data.version||"");
     const features=data.features||{};
     const previewSupported=features.previewImportacao===true || /v(49|50|5[1-9]|[6-9][0-9])/i.test(version);
+    const urgencySupported=features.urgenciaImportacao===true || /v(53|5[4-9]|[6-9][0-9])/i.test(version);
 
-    backendInfo={version,features,previewSupported};
+    backendInfo={version,features,previewSupported,urgencySupported};
 
     if(!previewSupported){
       throw new Error("The deployed backend "+(version||"is outdated")+" and does not support PDF preview. Update the Apps Script deployment.");
+    }
+
+    if(!urgencySupported){
+      throw new Error("The deployed backend "+(version||"is outdated")+" does not support urgent item selection. Deploy serra.gs v53 or later.");
     }
 
     if(showMessage)setMessage("Backend connected: "+version+".","ok");
@@ -236,7 +250,7 @@ async function testBackend(showMessage){
 }
 
 async function ensurePreviewBackend(){
-  if(backendInfo && backendInfo.previewSupported)return true;
+  if(backendInfo && backendInfo.previewSupported && backendInfo.urgencySupported)return true;
   return await testBackend(false);
 }
 
@@ -255,6 +269,17 @@ function setMessage(text,type){
   const el=document.getElementById("importMessage");
   el.textContent=text||"";
   el.className="message "+(type||"");
+}
+
+function isUrgentItem(item){
+  const value=item&&Object.prototype.hasOwnProperty.call(item,"Urgente")
+    ? item.Urgente
+    : item&&item.urgente;
+  const priority=String((item&&item.Prioridade)||(item&&item.prioridade)||"").trim().toUpperCase();
+
+  if(value===true || value===1)return true;
+  if(["TRUE","1","SIM","YES","URGENTE"].includes(String(value||"").trim().toUpperCase()))return true;
+  return priority==="URGENTE";
 }
 
 
@@ -379,7 +404,7 @@ async function preparePdfPreview(){
 
     currentPreview=data;
     previewMaterials=data.materiaisCadastro||[];
-    previewItems=(data.itens||[]).map(item=>Object.assign({},item,{_importar:true,_materialCadastroID:""}));
+    previewItems=(data.itens||[]).map(item=>Object.assign({},item,{_importar:true,_urgente:false,_materialCadastroID:""}));
 
     renderImportPreview(data);
     setMessage("PDF read. Review all items and confirm the import.","warning");
@@ -446,6 +471,7 @@ function renderPreviewRows(){
     if(!selected)row.classList.add("row-excluded");
     else if(manual)row.classList.add("row-material-corrected");
     else if(alert)row.classList.add("row-material-alert");
+    if(selected && item._urgente)row.classList.add("row-urgent");
 
     const options=buildMaterialOptions(item);
     const statusText=manual
@@ -457,7 +483,8 @@ function renderPreviewRows(){
 
     row.innerHTML=`
       <td><input class="preview-check" type="checkbox" ${selected?"checked":""} onchange="togglePreviewItem('${escapeHtml(item.PreviewItemID)}',this.checked)"></td>
-      <td>${escapeHtml(item.ItemCliente||"")}</td>
+      <td><input class="preview-urgent-check" type="checkbox" ${item._urgente?"checked":""} ${selected?"":"disabled"} title="Mark the full quantity of this item as urgent" onchange="togglePreviewUrgent('${escapeHtml(item.PreviewItemID)}',this.checked)"></td>
+      <td>${escapeHtml(item.ItemCliente||"")}${item._urgente?`<div style="margin-top:6px"><span class="badge urgent">URGENT</span></div>`:""}</td>
       <td>${escapeHtml(item.OrdemCorte||currentPreview.pedido.OrdemCorte||"")}</td>
       <td>${escapeHtml(item.NumeroPO||currentPreview.pedido.NumeroPO||"")}</td>
       <td><span class="code-raw">${escapeHtml(getMaterialCodePdf(item))}</span></td>
@@ -509,6 +536,15 @@ function togglePreviewItem(previewItemId,checked){
   const item=previewItems.find(row=>String(row.PreviewItemID)===String(previewItemId));
   if(!item)return;
   item._importar=!!checked;
+  if(!item._importar)item._urgente=false;
+  renderPreviewRows();
+  updatePreviewSummary();
+}
+
+function togglePreviewUrgent(previewItemId,checked){
+  const item=previewItems.find(row=>String(row.PreviewItemID)===String(previewItemId));
+  if(!item || !item._importar)return;
+  item._urgente=!!checked;
   renderPreviewRows();
   updatePreviewSummary();
 }
@@ -522,7 +558,7 @@ function changePreviewMaterial(previewItemId,materialCadastroID){
 }
 
 function selectAllPreviewItems(selected){
-  previewItems.forEach(item=>item._importar=!!selected);
+  previewItems.forEach(item=>{item._importar=!!selected;if(!selected)item._urgente=false;});
   renderPreviewRows();
   updatePreviewSummary();
 }
@@ -532,13 +568,16 @@ function getPreviewSummary(){
   const excluded=previewItems.filter(item=>!item._importar);
   const warnings=selected.filter(item=>hasMaterialAlert(item)&&!item._materialCadastroID);
   const corrected=selected.filter(item=>!!item._materialCadastroID);
+  const urgent=selected.filter(item=>!!item._urgente);
 
   return{
     selected,
     excluded,
     warnings,
     corrected,
-    pieces:selected.reduce((sum,item)=>sum+Number(item.Quantidade||0),0)
+    urgent,
+    pieces:selected.reduce((sum,item)=>sum+Number(item.Quantidade||0),0),
+    urgentPieces:urgent.reduce((sum,item)=>sum+Number(item.Quantidade||0),0)
   };
 }
 
@@ -547,12 +586,15 @@ function updatePreviewSummary(){
   showPreviewMaterialAlarm(previewItems);
   document.getElementById("prevSelectedItems").textContent=summary.selected.length;
   document.getElementById("prevSelectedPieces").textContent=summary.pieces;
+  document.getElementById("prevUrgentItems").textContent=summary.urgent.length;
+  document.getElementById("prevUrgentPieces").textContent=summary.urgentPieces;
   document.getElementById("prevExcludedItems").textContent=summary.excluded.length;
   document.getElementById("prevWarnings").textContent=summary.warnings.length;
 
   const parts=[
     summary.selected.length+" item(s) selected",
     summary.excluded.length+" excluded",
+    summary.urgent.length+" urgent item(s) / "+summary.urgentPieces+" urgent piece(s)",
     summary.corrected.length+" material correction(s)",
     summary.warnings.length+" warning(s) kept"
   ];
@@ -580,6 +622,7 @@ async function confirmCurrentPreview(){
     const decisoes=previewItems.map(item=>({
       PreviewItemID:item.PreviewItemID,
       importar:!!item._importar,
+      urgente:!!item._urgente,
       materialCadastroID:item._materialCadastroID||""
     }));
 
@@ -673,8 +716,10 @@ function renderImportedOrder(pedido,itens,alertasServidor){
     const materialManual=cadastroStatus.toUpperCase()==="SELECIONADO_MANUALMENTE";
 
     if(materialAlert) row.classList.add("row-material-alert");
+    if(isUrgentItem(item)) row.classList.add("order-urgent-preview");
 
     row.innerHTML = `
+      <td>${isUrgentItem(item)?`<span class="badge urgent">URGENT</span>`:`<span class="badge normal">NORMAL</span>`}</td>
       <td>${escapeHtml(item.ItemCliente||item.itemCliente||"")}</td>
       <td>${escapeHtml(item.OrdemCorte||item.ordemCorte||pedido.OrdemCorte||"")}</td>
       <td>${escapeHtml(item.NumeroPO||item.numeroPO||pedido.NumeroPO||"")}</td>
@@ -709,7 +754,7 @@ function renderRecentOrders(items){
   body.innerHTML="";
 
   if(!items.length){
-    body.innerHTML='<tr><td colspan="9">No imported orders found.</td></tr>';
+    body.innerHTML='<tr><td colspan="10">No imported orders found.</td></tr>';
     return;
   }
 
@@ -719,11 +764,14 @@ function renderRecentOrders(items){
 
     const totalAlerts=Number(order.TotalAlertasMaterial||0);
     if(totalAlerts) row.classList.add("order-material-alert");
+    const totalUrgent=Number(order.TotalItensUrgentes||0);
+    if(totalUrgent) row.classList.add("order-urgent-preview");
 
     row.innerHTML = `
       <td>${escapeHtml(order.OrdemCorte||"")}</td>
       <td>${escapeHtml(order.NumeroPO||"")}</td>
       <td>${escapeHtml(order.Status||"")}</td>
+      <td>${totalUrgent?`<span class="badge urgent">${totalUrgent} item(s) / ${escapeHtml(order.TotalPecasUrgentes||0)} pcs</span>`:`<span class="badge normal">NORMAL</span>`}</td>
       <td>${totalAlerts?`<span class="badge material-warning">⚠ ${totalAlerts}</span>`:`<span class="badge registered">OK</span>`}</td>
       <td>${escapeHtml(order.TotalItens||"")}</td>
       <td>${escapeHtml(order.TotalPecas||"")}</td>
