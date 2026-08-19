@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CDM Cutting Orders v27 — Urgent items</title>
+<title>Importação PO CDM — Frontend v33</title>
 <style>
 *{box-sizing:border-box}
 body{margin:0;font-family:Arial,Helvetica,sans-serif;background:#eef3f9;color:#0f172a}
@@ -18,6 +18,16 @@ label{display:block;font-weight:800;font-size:18px;margin:14px 0 8px}
 input[type=file],input[type=email],input[type=text]{width:100%;border:1px solid #cbd5e1;border-radius:16px;padding:14px 18px;font-size:22px;background:white}
 button{border:0;border-radius:16px;padding:16px 22px;font-size:20px;font-weight:900;cursor:pointer}
 .btn-primary{background:#2563eb;color:white}.btn-dark{background:#111827;color:white}.btn-light{background:#e8eef7;color:#1e40af}
+button:disabled,input:disabled,select:disabled{cursor:not-allowed;opacity:.55}
+.version-badge{display:inline-flex;align-items:center;gap:8px;margin-top:12px;padding:7px 12px;border-radius:999px;background:rgba(255,255,255,.18);font-size:14px;font-weight:900;letter-spacing:.02em}
+.import-overlay{position:fixed;inset:0;background:rgba(15,23,42,.82);z-index:9999;display:flex;align-items:center;justify-content:center;padding:24px}
+.import-overlay-card{width:min(620px,95vw);background:#fff;border-radius:28px;padding:34px;text-align:center;box-shadow:0 28px 80px rgba(0,0,0,.38)}
+.import-overlay-card h2{margin:0 0 12px;font-size:34px}
+.import-overlay-card p{margin:8px 0;color:#475569;font-size:19px;line-height:1.45}
+.import-spinner{width:66px;height:66px;border:8px solid #dbeafe;border-top-color:#2563eb;border-radius:50%;margin:0 auto 22px;animation:importSpin 1s linear infinite}
+.import-elapsed{margin-top:18px;font-family:Consolas,monospace;font-size:25px;font-weight:900;color:#1d4ed8}
+.import-progress-note{margin-top:16px;padding:13px 15px;border-radius:14px;background:#eff6ff;color:#1e3a8a;font-weight:900}
+@keyframes importSpin{to{transform:rotate(360deg)}}
 .message{margin-top:16px;font-weight:900;font-size:18px}.message.error{color:#dc2626}.message.ok{color:#16a34a}.message.warning{color:#92400e}
 .cards{display:grid;grid-template-columns:repeat(4,minmax(220px,1fr));gap:14px;margin-bottom:16px}
 .info-box{border:1px solid #d7e1ef;background:#f8fafc;border-radius:20px;padding:18px}.info-label{font-size:16px;font-weight:900;color:#64748b}.info-value{margin-top:8px;font-size:30px;font-weight:900}
@@ -59,6 +69,29 @@ th{background:#f8fafc;font-weight:900}tr:last-child td{border-bottom:0}
 .preview-footer{position:sticky;bottom:0;background:rgba(255,255,255,.97);border-top:2px solid #cbd5e1;margin:18px -24px -24px;padding:16px 24px;display:flex;justify-content:space-between;align-items:center;gap:14px;box-shadow:0 -8px 20px rgba(15,23,42,.08)}
 .preview-footer-actions{display:flex;gap:10px;flex-wrap:wrap}
 .preview-warning{background:#fff7ed;border:3px solid #f97316;color:#7c2d12;border-radius:18px;padding:16px;font-weight:900;margin:14px 0}
+
+.repeated-po-alert{margin:16px 0;padding:18px;border:3px solid #f59e0b;border-radius:18px;background:#fffbeb;color:#78350f}
+.repeated-po-alert h3{margin:0 0 8px;font-size:24px}
+.repeated-po-alert strong{font-weight:900}
+.sequence-alert{margin:16px 0;padding:18px;border:3px solid #ea580c;border-radius:18px;background:#fff7ed;color:#7c2d12}
+.sequence-alert h3{margin:0 0 8px;font-size:24px}
+.sequence-row{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:10px 0;border-top:1px solid #fed7aa}
+.sequence-diagnostic{margin-top:12px;padding:10px 12px;border-radius:12px;background:#fff;color:#475569;font-size:13px;line-height:1.5}
+.coverage-alert{margin:16px 0;padding:18px;border:3px solid #dc2626;border-radius:18px;background:#fff1f2;color:#7f1d1d}
+.coverage-alert h3{margin:0 0 8px;font-size:24px}
+.coverage-alert .missing-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 0;border-top:1px solid #fecaca}
+.coverage-alert .missing-row:first-of-type{border-top:0}
+.coverage-ok{margin:16px 0;padding:14px 18px;border:2px solid #16a34a;border-radius:16px;background:#f0fdf4;color:#166534;font-weight:900}
+.modal-backdrop{position:fixed;inset:0;background:rgba(15,23,42,.72);display:flex;align-items:center;justify-content:center;z-index:9999;padding:20px}
+.modal-card{width:min(760px,96vw);max-height:92vh;overflow:auto;background:#fff;border-radius:24px;padding:24px;box-shadow:0 25px 70px rgba(0,0,0,.35)}
+.modal-card h3{margin:0 0 16px;font-size:28px}
+.manual-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.manual-grid .full{grid-column:1/-1}
+.manual-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:20px}
+.btn-danger{background:#dc2626;color:#fff}.btn-success{background:#16a34a;color:#fff}
+.source-manual{font-size:12px;font-weight:900;color:#1d4ed8;margin-top:4px}
+@media(max-width:720px){.manual-grid{grid-template-columns:1fr}.manual-grid .full{grid-column:auto}}
+
 @media(max-width:1000px){.preview-summary{grid-template-columns:1fr 1fr}.preview-footer{position:static;margin:18px 0 0}}
 
 .hidden{display:none!important}
@@ -71,6 +104,7 @@ th{background:#f8fafc;font-weight:900}tr:last-child td{border-bottom:0}
     <div>
       <h1>CDM Cutting Orders</h1>
       <p>Import Schnaidt PDF orders and send them to the saw panel</p>
+      <div class="version-badge">Frontend v33 • Backend v55</div>
     </div>
     <div class="header-actions">
       <button class="btn-dark" onclick="openSawPanel()">Open saw panel</button>
@@ -84,7 +118,7 @@ th{background:#f8fafc;font-weight:900}tr:last-child td{border-bottom:0}
     <label>User / email</label>
     <input id="userEmail" type="email" placeholder="your.name@company.com">
     <div style="margin-top:18px;">
-      <button class="btn-primary" onclick="preparePdfPreview()">Read PDF and review</button>
+      <button id="readPdfButton" class="btn-primary" onclick="preparePdfPreview()">Read PDF and review</button>
     </div>
     <div id="importMessage" class="message"></div>
   </section>
@@ -97,13 +131,18 @@ th{background:#f8fafc;font-weight:900}tr:last-child td{border-bottom:0}
       <div class="info-box"><div class="info-label">PO</div><div id="prevPo" class="info-value">-</div></div>
       <div class="info-box"><div class="info-label">PDF items</div><div id="prevPdfItems" class="info-value">-</div></div>
       <div class="info-box"><div class="info-label">PDF pieces</div><div id="prevPdfPieces" class="info-value">-</div></div>
+      <div class="info-box"><div class="info-label">Loaded / resolved</div><div id="prevLoadedItems" class="info-value">-</div></div>
     </div>
 
+    <div id="previewRepeatedPoBox"></div>
+    <div id="previewSequenceBox"></div>
+    <div id="previewCoverageBox"></div>
     <div id="previewMaterialAlertBox" class="material-alert-box hidden"></div>
 
     <div class="preview-toolbar">
       <button class="btn-light" onclick="selectAllPreviewItems(true)">Select all</button>
       <button class="btn-light" onclick="selectAllPreviewItems(false)">Deselect all</button>
+      <button class="btn-success" onclick="openManualItemModal()">+ Add item manually</button>
       <span style="font-weight:900;color:#475569">All items are selected by default. Uncheck only what must not be imported.</span>
     </div>
 
@@ -120,7 +159,7 @@ th{background:#f8fafc;font-weight:900}tr:last-child td{border-bottom:0}
       <table class="preview-table">
         <thead>
           <tr>
-            <th>Import</th><th>Urgent</th><th>Item</th><th>Order</th><th>PO</th><th>PDF code</th><th>Parsed material</th><th>Color</th><th>Thickness</th><th>Measure</th><th>Qty</th><th>Validation</th><th>Material decision</th>
+            <th>Import</th><th>Urgent</th><th>Item</th><th>Order</th><th>PO</th><th>PDF code</th><th>Parsed material</th><th>Color</th><th>Thickness</th><th>Measure</th><th>Qty</th><th>Validation</th><th>Material decision</th><th>Actions</th>
           </tr>
         </thead>
         <tbody id="previewItemsBody"></tbody>
@@ -130,11 +169,39 @@ th{background:#f8fafc;font-weight:900}tr:last-child td{border-bottom:0}
     <div class="preview-footer">
       <div id="previewDecisionText" style="font-weight:900;color:#334155">Review all items before importing.</div>
       <div class="preview-footer-actions">
-        <button class="btn-light" onclick="cancelCurrentPreview()">Cancel - do not import</button>
-        <button class="btn-primary" onclick="confirmCurrentPreview()">Confirm selected items</button>
+        <button id="cancelPreviewButton" class="btn-light" onclick="cancelCurrentPreview()">Cancel - do not import</button>
+        <button id="confirmImportButton" class="btn-primary" onclick="confirmCurrentPreview()">Confirm selected items</button>
       </div>
     </div>
   </section>
+
+
+  <div id="manualItemModal" class="modal-backdrop hidden">
+    <div class="modal-card">
+      <h3 id="manualModalTitle">Add item manually</h3>
+      <div class="manual-grid">
+        <div><label>Item</label><input id="manualItemCliente" type="text" inputmode="numeric" placeholder="00010"></div>
+        <div><label>Raw material</label>
+          <select id="manualMaterialCode" class="material-choice">
+            <option value="">Select...</option>
+            <option value="68910">68910 — BLACK</option>
+            <option value="68940">68940 — GREY</option>
+          </select>
+        </div>
+        <div><label>Thickness (mm)</label><input id="manualEspessura" type="text" inputmode="decimal"></div>
+        <div><label>Quantity</label><input id="manualQuantidade" type="text" inputmode="decimal"></div>
+        <div><label>Width (mm)</label><input id="manualLargura" type="text" inputmode="decimal"></div>
+        <div><label>Length (mm)</label><input id="manualComprimento" type="text" inputmode="decimal"></div>
+        <div><label>Delivery date</label><input id="manualDataEntrega" type="text" placeholder="24.08.2026"></div>
+        <div style="display:flex;align-items:end;padding-bottom:8px"><label style="margin:0"><input id="manualUrgente" type="checkbox"> Urgent</label></div>
+      </div>
+      <div id="manualItemError" class="message error"></div>
+      <div class="manual-actions">
+        <button class="btn-light" onclick="closeManualItemModal()">Cancel</button>
+        <button class="btn-primary" onclick="saveManualItem()">Add / update item</button>
+      </div>
+    </div>
+  </div>
 
   <section id="importedSection" class="card hidden">
     <h2>Imported order</h2>
@@ -172,19 +239,55 @@ th{background:#f8fafc;font-weight:900}tr:last-child td{border-bottom:0}
   </section>
 </div>
 
+
+<div id="importOverlay" class="import-overlay hidden" role="dialog" aria-modal="true" aria-live="assertive">
+  <div class="import-overlay-card">
+    <div class="import-spinner"></div>
+    <h2>IMPORTAÇÃO EM ANDAMENTO</h2>
+    <p id="importOverlayTitle">A PO está sendo gravada no sistema.</p>
+    <p>Não clique novamente, não feche esta janela e aguarde a confirmação.</p>
+    <div id="importOverlayElapsed" class="import-elapsed">00:00</div>
+    <div id="importOverlayNote" class="import-progress-note">A preparar a confirmação...</div>
+  </div>
+</div>
+
 <script>
+/************************************************************
+ * IMPORTAÇÃO DE PO CDM — FRONTEND v29
+ * Backend mínimo: serra.gs v55
+ * - Parser Unit=Piece / 68.910N
+ * - Confirmação idempotente
+ * - Bloqueio de múltiplos cliques
+ ************************************************************/
+
 /************************************************************
  * API DO APPS SCRIPT
  *
  * Após cada novo deploy, substitua somente a URL abaixo pela
  * URL atual terminada em /exec.
  ************************************************************/
-const API_URL = "https://script.google.com/macros/s/AKfycbxZawbyH5IhJ1Sd2Vwc8Z2SZYzFq3lnucVCz4fN8lVymahJ5j6c4ElqgrvIt7lC3gcl/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbxjMO3OjreXmw5nKohUHU5eySUJfJ1xaIcL337wlEY5yVR2wg1FntxSDFPAwiunBkX8/exec";
+
+const FRONTEND_VERSION = "v33";
+const BACKEND_MIN_VERSION = "v58";
 
 let currentPreview = null;
 let previewMaterials = [];
 let previewItems = [];
 let backendInfo = null;
+let lastBackendVersionDetected = "";
+let importacaoEmCurso = false;
+let leituraPdfEmCurso = false;
+let importTimer = null;
+let importStartedAt = 0;
+let pdfDeclaredItems = [];
+let pdfSequenceWarnings = [];
+let pdfSequenceSuspects = [];
+let pdfSequenceConfirmedAbsent = new Set();
+let pdfIgnoredItems = new Set();
+let manualPreviewItems = [];
+let manualEditingId = "";
+let repeatedPoPreview = false;
 
 function getApiUrl(){
   const value=String(API_URL||"").trim().replace(/[?#].*$/,"").replace(/\/$/,"");
@@ -194,17 +297,27 @@ function getApiUrl(){
   return value;
 }
 
-async function apiPost(payload){
+async function apiPost(payload,timeoutMs){
   const apiUrl=getApiUrl();
+  const timeout=Number(timeoutMs||60000);
+  const controller=new AbortController();
+  const timer=setTimeout(()=>controller.abort(),timeout);
   let res;
+
   try{
     res=await fetch(apiUrl,{
       method:"POST",
       body:JSON.stringify(payload),
-      headers:{"Content-Type":"text/plain;charset=utf-8"}
+      headers:{"Content-Type":"text/plain;charset=utf-8"},
+      signal:controller.signal
     });
   }catch(error){
+    if(error && error.name==="AbortError"){
+      throw new Error("API timeout. The server may still be processing the request.");
+    }
     throw new Error("Could not connect to the Apps Script Web App. Check the URL and deployment access.");
+  }finally{
+    clearTimeout(timer);
   }
 
   const raw=await res.text();
@@ -226,11 +339,18 @@ async function testBackend(showMessage){
     if(!data || !data.ok)throw new Error(data&&data.message?data.message:"Backend test failed.");
 
     const version=String(data.version||"");
+    lastBackendVersionDetected=version;
     const features=data.features||{};
     const previewSupported=features.previewImportacao===true || /v(49|50|5[1-9]|[6-9][0-9])/i.test(version);
     const urgencySupported=features.urgenciaImportacao===true || /v(53|5[4-9]|[6-9][0-9])/i.test(version);
+    const idempotencySupported=features.importacaoIdempotente===true || /v(54|5[5-9]|[6-9][0-9])/i.test(version);
+    const pieceParserSupported=features.parserPiecePontuado===true || /v(54|5[5-9]|[6-9][0-9])/i.test(version);
+    const coverageSupported=features.coberturaItensPdf===true || /v(55|5[6-9]|[6-9][0-9])/i.test(version);
+    const rawCoverageSupported=features.coberturaTextoBrutoIndependente===true || /v(56|5[7-9]|[6-9][0-9])/i.test(version);
+    const repeatedPreviewSupported=features.previewPoRepetida===true || /v(57|5[8-9]|[6-9][0-9])/i.test(version);
+    const sequenceGapSupported=features.lacunasSequenciaBloqueantes===true || /v(58|59|[6-9][0-9])/i.test(version);
 
-    backendInfo={version,features,previewSupported,urgencySupported};
+    backendInfo={version,features,previewSupported,urgencySupported,idempotencySupported,pieceParserSupported,coverageSupported,rawCoverageSupported,repeatedPreviewSupported,sequenceGapSupported};
 
     if(!previewSupported){
       throw new Error("The deployed backend "+(version||"is outdated")+" and does not support PDF preview. Update the Apps Script deployment.");
@@ -238,6 +358,14 @@ async function testBackend(showMessage){
 
     if(!urgencySupported){
       throw new Error("The deployed backend "+(version||"is outdated")+" does not support urgent item selection. Deploy serra.gs v53 or later.");
+    }
+
+    if(!idempotencySupported || !pieceParserSupported){
+      throw new Error("The deployed backend "+(version||"is outdated")+" must be updated to serra.gs v54 or later.");
+    }
+
+    if(!coverageSupported || !rawCoverageSupported || !repeatedPreviewSupported || !sequenceGapSupported){
+      throw new Error("The deployed backend "+(version||"is outdated")+" does not support blocking sequence-gap checks. Deploy serra.gs v58 or later.");
     }
 
     if(showMessage)setMessage("Backend connected: "+version+".","ok");
@@ -250,7 +378,18 @@ async function testBackend(showMessage){
 }
 
 async function ensurePreviewBackend(){
-  if(backendInfo && backendInfo.previewSupported && backendInfo.urgencySupported)return true;
+  if(
+    backendInfo &&
+    backendInfo.previewSupported &&
+    backendInfo.urgencySupported &&
+    backendInfo.idempotencySupported &&
+    backendInfo.pieceParserSupported &&
+    backendInfo.coverageSupported &&
+    backendInfo.rawCoverageSupported &&
+    backendInfo.repeatedPreviewSupported &&
+    backendInfo.sequenceGapSupported
+  )return true;
+
   return await testBackend(false);
 }
 
@@ -270,6 +409,129 @@ function setMessage(text,type){
   el.textContent=text||"";
   el.className="message "+(type||"");
 }
+
+function formatElapsedImport(ms){
+  const total=Math.max(0,Math.floor(Number(ms||0)/1000));
+  const min=String(Math.floor(total/60)).padStart(2,"0");
+  const sec=String(total%60).padStart(2,"0");
+  return min+":"+sec;
+}
+
+function updateImportOverlayNote(text){
+  const el=document.getElementById("importOverlayNote");
+  if(el)el.textContent=text||"";
+}
+
+function setImportUiBusy(busy,title){
+  importacaoEmCurso=!!busy;
+
+  const overlay=document.getElementById("importOverlay");
+  const titleEl=document.getElementById("importOverlayTitle");
+  const confirmBtn=document.getElementById("confirmImportButton");
+  const cancelBtn=document.getElementById("cancelPreviewButton");
+  const readBtn=document.getElementById("readPdfButton");
+  const pdfInput=document.getElementById("pdfFile");
+  const emailInput=document.getElementById("userEmail");
+
+  if(titleEl && title)titleEl.textContent=title;
+
+  [confirmBtn,cancelBtn,readBtn,pdfInput,emailInput].forEach(el=>{
+    if(el)el.disabled=!!busy;
+  });
+
+  document.querySelectorAll(
+    ".preview-check,.preview-urgent-check,.material-choice"
+  ).forEach(el=>el.disabled=!!busy);
+
+  if(busy){
+    if(overlay)overlay.classList.remove("hidden");
+    importStartedAt=Date.now();
+    const elapsed=document.getElementById("importOverlayElapsed");
+    if(elapsed)elapsed.textContent="00:00";
+
+    if(importTimer)clearInterval(importTimer);
+    importTimer=setInterval(()=>{
+      const target=document.getElementById("importOverlayElapsed");
+      if(target)target.textContent=formatElapsedImport(Date.now()-importStartedAt);
+    },500);
+  }else{
+    if(importTimer){
+      clearInterval(importTimer);
+      importTimer=null;
+    }
+    if(overlay)overlay.classList.add("hidden");
+  }
+}
+
+function sleepImport(ms){
+  return new Promise(resolve=>setTimeout(resolve,ms));
+}
+
+async function recoverImportResult(importacaoRequestID,previewId,maxWaitMs){
+  const requestID=String(importacaoRequestID||"").trim();
+  const started=Date.now();
+  const maxWait=Number(maxWaitMs||120000);
+
+  if(!requestID)return null;
+
+  while(Date.now()-started<maxWait){
+    updateImportOverlayNote("A verificar o estado da importação no servidor...");
+
+    try{
+      const state=await apiPost({
+        action:"consultarEstadoImportacaoPedidoCdmPdf",
+        importacaoRequestID:requestID,
+        previewId:previewId||""
+      },30000);
+
+      if(state && state.ok===false){
+        throw new Error(state.message||"State query failed.");
+      }
+
+      if(state && state.completed && state.pedido){
+        return state;
+      }
+
+      if(state && String(state.statusImportacao||"").toUpperCase()==="ERRO"){
+        throw new Error(state.message||"The import failed on the server.");
+      }
+    }catch(error){
+      if(/failed on the server|erro/i.test(String(error.message||""))){
+        throw error;
+      }
+    }
+
+    await sleepImport(2500);
+  }
+
+  return null;
+}
+
+function finishImportSuccess(data){
+  setMessage(
+    data.totalAlertasMaterial
+      ? "PO imported with "+data.totalAlertasMaterial+" warning(s)."
+      : (data.idempotente
+          ? "PO was already imported. Existing result recovered."
+          : "PO imported successfully after review."),
+    data.totalAlertasMaterial?"warning":"ok"
+  );
+
+  document.getElementById("previewSection").classList.add("hidden");
+  renderImportedOrder(data.pedido,data.itens||[],data.alertasMateriais||[]);
+  currentPreview=null;
+  previewMaterials=[];
+  previewItems=[];
+  document.getElementById("pdfFile").value="";
+  setImportUiBusy(false);
+  loadRecentOrders();
+}
+
+window.addEventListener("beforeunload",event=>{
+  if(!importacaoEmCurso)return;
+  event.preventDefault();
+  event.returnValue="";
+});
 
 function isUrgentItem(item){
   const value=item&&Object.prototype.hasOwnProperty.call(item,"Urgente")
@@ -368,10 +630,24 @@ function fileToBase64(file){
 }
 
 async function preparePdfPreview(){
+  if(leituraPdfEmCurso || importacaoEmCurso)return;
+
+  leituraPdfEmCurso=true;
+  const readBtn=document.getElementById("readPdfButton");
+  const pdfInput=document.getElementById("pdfFile");
+  const emailInput=document.getElementById("userEmail");
+
+  if(readBtn){
+    readBtn.disabled=true;
+    readBtn.textContent="Reading PDF...";
+  }
+  if(pdfInput)pdfInput.disabled=true;
+  if(emailInput)emailInput.disabled=true;
+
   try{
     const backendReady=await ensurePreviewBackend();
     if(!backendReady){
-      setMessage("Error: The backend in API_URL does not support PDF review. Update the Apps Script deployment and replace API_URL if the /exec URL changed.","error");
+      setMessage("Error: Backend validation failed. Detected: "+(lastBackendVersionDetected||"unknown")+". Required: serra.gs v55 with coberturaItensPdf.","error");
       return;
     }
 
@@ -398,13 +674,24 @@ async function preparePdfPreview(){
       filename:file.name,
       base64,
       userEmail:email
-    });
+    },120000);
 
     if(!data.ok)throw new Error(data.message||"Preview error.");
 
     currentPreview=data;
+    repeatedPoPreview=(data.poJaImportada===true || String(data.modoPreview||"").toUpperCase()==="SOMENTE_VISUALIZACAO");
+    pdfDeclaredItems=(data.itensDeclaradosPdf||[]).map(normalizePreviewItemNumber).filter(Boolean);
+    pdfSequenceWarnings=(data.avisosSequenciaItensPdf||[]);
+    pdfSequenceSuspects=(data.itensSuspeitosSequencia||[]).map(normalizePreviewItemNumber).filter(Boolean);
+    pdfIgnoredItems=new Set();
+    pdfSequenceConfirmedAbsent=new Set();
+    manualPreviewItems=[];
     previewMaterials=data.materiaisCadastro||[];
-    previewItems=(data.itens||[]).map(item=>Object.assign({},item,{_importar:true,_urgente:false,_materialCadastroID:""}));
+    previewItems=(data.itens||[]).map(item=>Object.assign({},item,{
+      _importar:true,
+      _urgente:false,
+      _materialCadastroID:""
+    }));
 
     renderImportPreview(data);
     setMessage("PDF read. Review all items and confirm the import.","warning");
@@ -412,6 +699,288 @@ async function preparePdfPreview(){
 
   }catch(error){
     setMessage("Error: "+error.message,"error");
+  }finally{
+    leituraPdfEmCurso=false;
+    if(readBtn){
+      readBtn.disabled=false;
+      readBtn.textContent="Read PDF and review";
+    }
+    if(pdfInput)pdfInput.disabled=false;
+    if(emailInput)emailInput.disabled=false;
+  }
+}
+
+
+function normalizePreviewItemNumber(value){
+  const digits=String(value==null?"":value).replace(/\D/g,"");
+  if(!digits)return "";
+  return digits.padStart(5,"0").slice(-5);
+}
+
+function getResolvedPdfItemSet(){
+  const set=new Set();
+  previewItems.forEach(item=>{
+    if(item._importar===false)return;
+    const id=normalizePreviewItemNumber(item.ItemCliente);
+    if(id)set.add(id);
+  });
+  pdfIgnoredItems.forEach(id=>set.add(normalizePreviewItemNumber(id)));
+  return set;
+}
+
+function getUnresolvedPdfItems(){
+  const resolved=getResolvedPdfItemSet();
+  return pdfDeclaredItems.filter(id=>!resolved.has(id));
+}
+
+function renderRepeatedPoWarning(){
+  const box=document.getElementById("previewRepeatedPoBox");
+  if(!box)return;
+
+  if(!repeatedPoPreview){
+    box.className="";
+    box.innerHTML="";
+    return;
+  }
+
+  const po=(currentPreview&&currentPreview.pedido&&currentPreview.pedido.NumeroPO) || "";
+
+  box.className="repeated-po-alert";
+  box.innerHTML=`
+    <h3>⚠ PO REPETIDA — MODO DE TESTE / PREVIEW</h3>
+    <div>A PO <strong>${escapeHtml(po)}</strong> já foi importada.</div>
+    <div style="margin-top:6px">Pode revisar todo o preview, testar alarmes de itens em falta, inserir itens manualmente e conferir matérias-primas, mas <strong>esta PO não pode ser importada novamente</strong>.</div>
+  `;
+}
+
+function getSelectedPreviewItemSet(){
+  const set=new Set();
+  previewItems.forEach(item=>{
+    if(item._importar===false)return;
+    const id=normalizePreviewItemNumber(item.ItemCliente);
+    if(id)set.add(id);
+  });
+  return set;
+}
+
+function getUnresolvedSequenceSuspects(){
+  const selected=getSelectedPreviewItemSet();
+  return pdfSequenceSuspects.filter(
+    id=>!selected.has(id) && !pdfSequenceConfirmedAbsent.has(id)
+  );
+}
+
+function confirmSequenceItemAbsent(itemId){
+  const id=normalizePreviewItemNumber(itemId);
+  if(!id)return;
+
+  if(!confirm(
+    "Confirm that item "+id+" really does NOT exist in this PO?\n\n"+
+    "The system will keep the PO without this item."
+  ))return;
+
+  pdfSequenceConfirmedAbsent.add(id);
+  renderSequenceAlarm();
+  updatePreviewSummary();
+}
+
+function renderSequenceAlarm(){
+  const box=document.getElementById("previewSequenceBox");
+  if(!box)return;
+
+  const unresolved=getUnresolvedSequenceSuspects();
+  const selected=getSelectedPreviewItemSet();
+
+  if(!pdfSequenceSuspects.length){
+    box.className="";
+    box.innerHTML="";
+    return;
+  }
+
+  if(!unresolved.length){
+    box.className="coverage-ok";
+    box.innerHTML=`✓ Sequence check resolved — ${escapeHtml(pdfSequenceSuspects.length)} suspected gap(s) reviewed.`;
+    return;
+  }
+
+  box.className="sequence-alert";
+  box.innerHTML=`
+    <h3>⚠ POSSIBLE ITEM GAP IN PO SEQUENCE</h3>
+    <div>The PDF extraction did not identify: <b>${escapeHtml(unresolved.join(", "))}</b>.</div>
+    <div style="margin-top:8px"><strong>The system is not assuming the item exists.</strong> Add it manually if it is present in the PO, or explicitly confirm that it does not exist.</div>
+
+    ${unresolved.map(id=>`
+      <div class="sequence-row">
+        <div><b>Possible missing item ${escapeHtml(id)}</b></div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn-primary" onclick="openManualItemModal('${escapeHtml(id)}')">Add / fill manually</button>
+          <button class="btn-light" onclick="confirmSequenceItemAbsent('${escapeHtml(id)}')">Confirm it does not exist</button>
+        </div>
+      </div>
+    `).join("")}
+
+    <div class="sequence-diagnostic">
+      <b>Diagnostic</b><br>
+      Items identified in PDF text: ${escapeHtml(pdfDeclaredItems.join(", ")||"(none)")}<br>
+      Items currently in preview: ${escapeHtml([...selected].sort().join(", ")||"(none)")}<br>
+      Suspected sequence gaps: ${escapeHtml(pdfSequenceSuspects.join(", ")||"(none)")}
+    </div>
+  `;
+}
+
+function renderCoverageAlarm(){
+  const box=document.getElementById("previewCoverageBox");
+  if(!box)return;
+
+  const unresolved=getUnresolvedPdfItems();
+  const unexpected=previewItems
+    .filter(item=>item._importar!==false)
+    .map(item=>normalizePreviewItemNumber(item.ItemCliente))
+    .filter(id=>id && pdfDeclaredItems.length && !pdfDeclaredItems.includes(id));
+
+  document.getElementById("prevLoadedItems").textContent=
+    Math.max(pdfDeclaredItems.length-unresolved.length,0)+"/"+(pdfDeclaredItems.length||previewItems.length);
+
+  if(unexpected.length){
+    box.className="coverage-alert";
+    box.innerHTML=`<h3>⛔ UNEXPECTED ITEM IN PREVIEW</h3>
+      <div>Loaded item(s) not identified in the PDF list: <b>${escapeHtml([...new Set(unexpected)].join(", "))}</b>.</div>`;
+    return;
+  }
+
+  if(!unresolved.length){
+    box.className="coverage-ok";
+    box.innerHTML=`✓ PDF coverage OK — ${escapeHtml(pdfDeclaredItems.length||previewItems.length)} item(s) found in the PDF and all have a decision.
+      ${pdfSequenceWarnings.length?`<div style="margin-top:8px;color:#92400e">⚠ ${escapeHtml(pdfSequenceWarnings.join(" | "))}</div>`:""}`;
+    return;
+  }
+
+  box.className="coverage-alert";
+  box.innerHTML=`
+    <h3>⛔ ${unresolved.length} ITEM(S) FROM THE PDF NOT RESOLVED</h3>
+    <div><b>${escapeHtml(pdfDeclaredItems.length)}</b> item(s) were found independently in the PDF text. The preview resolved <b>${escapeHtml(pdfDeclaredItems.length-unresolved.length)}</b>. Pending: <b>${escapeHtml(unresolved.join(", "))}</b>.</div>
+    ${pdfSequenceWarnings.length?`<div style="margin-top:8px">⚠ ${escapeHtml(pdfSequenceWarnings.join(" | "))}</div>`:""}
+    <div style="margin:8px 0 12px">Fill each item manually or explicitly ignore it. Import confirmation remains blocked until all are resolved.</div>
+    ${unresolved.map(id=>`
+      <div class="missing-row">
+        <div><b>Item ${escapeHtml(id)}</b> — not interpreted automatically</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn-primary" onclick="openManualItemModal('${escapeHtml(id)}')">Fill manually</button>
+          <button class="btn-light" onclick="ignorePdfItem('${escapeHtml(id)}')">Ignore item</button>
+        </div>
+      </div>`).join("")}
+  `;
+}
+
+function ignorePdfItem(itemId){
+  const id=normalizePreviewItemNumber(itemId);
+  if(!id)return;
+  if(!confirm("Ignore item "+id+" from this import? The item exists in the PDF but will not be imported."))return;
+  pdfIgnoredItems.add(id);
+  previewItems=previewItems.filter(item=>!(item._manual && normalizePreviewItemNumber(item.ItemCliente)===id));
+  manualPreviewItems=manualPreviewItems.filter(item=>normalizePreviewItemNumber(item.ItemCliente)!==id);
+  renderSequenceAlarm();
+  renderCoverageAlarm();
+  renderPreviewRows();
+  updatePreviewSummary();
+}
+
+function openManualItemModal(itemId){
+  if(!currentPreview)return;
+  const id=normalizePreviewItemNumber(itemId||"");
+  const existing=previewItems.find(item=>item._manual && normalizePreviewItemNumber(item.ItemCliente)===id);
+  manualEditingId=existing?String(existing.PreviewItemID||""):"";
+
+  document.getElementById("manualModalTitle").textContent=existing?"Edit manual item":"Add item manually";
+  document.getElementById("manualItemCliente").value=existing?existing.ItemCliente:id;
+  document.getElementById("manualMaterialCode").value=existing?(existing.CodigoMaterialReferencia||existing.CodigoCliente||""):"";
+  document.getElementById("manualEspessura").value=existing?(existing.Espessura||""):"";
+  document.getElementById("manualQuantidade").value=existing?(existing.Quantidade||""):"";
+  document.getElementById("manualLargura").value=existing?(existing.Largura||""):"";
+  document.getElementById("manualComprimento").value=existing?(existing.Comprimento||""):"";
+  document.getElementById("manualDataEntrega").value=existing?(existing.DataEntrega||""):((currentPreview.pedido||{}).DataEntrega||"");
+  document.getElementById("manualUrgente").checked=existing?!!existing._urgente:false;
+  document.getElementById("manualItemError").textContent="";
+  document.getElementById("manualItemModal").classList.remove("hidden");
+}
+
+function closeManualItemModal(){
+  document.getElementById("manualItemModal").classList.add("hidden");
+  manualEditingId="";
+}
+
+function manualPositiveNumber(id,label){
+  const raw=document.getElementById(id).value.trim().replace(",",".");
+  const n=Number(raw);
+  if(!Number.isFinite(n)||n<=0)throw new Error(label+" must be greater than zero.");
+  return n;
+}
+
+function saveManualItem(){
+  try{
+    const itemCliente=normalizePreviewItemNumber(document.getElementById("manualItemCliente").value);
+    if(!/^0\d{4}$/.test(itemCliente))throw new Error("Enter a valid item number.");
+
+    const material=document.getElementById("manualMaterialCode").value;
+    if(!["68910","68940"].includes(material))throw new Error("Select 68910 BLACK or 68940 GREY.");
+
+    const espessura=manualPositiveNumber("manualEspessura","Thickness");
+    const quantidade=manualPositiveNumber("manualQuantidade","Quantity");
+    const largura=manualPositiveNumber("manualLargura","Width");
+    const comprimento=manualPositiveNumber("manualComprimento","Length");
+    const dataEntrega=document.getElementById("manualDataEntrega").value.trim();
+    const urgente=document.getElementById("manualUrgente").checked;
+
+    const duplicate=previewItems.find(item=>
+      normalizePreviewItemNumber(item.ItemCliente)===itemCliente &&
+      String(item.PreviewItemID||"")!==String(manualEditingId||"")
+    );
+    if(duplicate)throw new Error("Item "+itemCliente+" already exists in the preview.");
+
+    const obj={
+      PreviewItemID:manualEditingId||("MANUAL-"+Date.now()+"-"+Math.random().toString(36).slice(2,8)),
+      ItemCliente:itemCliente,
+      NumeroPO:(currentPreview.pedido||{}).NumeroPO||"",
+      OrdemCorte:(currentPreview.pedido||{}).OrdemCorte||"",
+      CodigoCliente:material,
+      CodigoMaterialPDF:material,
+      CodigoMaterialReferencia:material,
+      Material:"CDM "+material+" "+(material==="68910"?"black":"grey")+" "+espessura+" mm",
+      Serie:material==="68910"?"68.910N":"68.940",
+      Cor:material==="68910"?"black":"grey",
+      Espessura:espessura,
+      Largura:largura,
+      Comprimento:comprimento,
+      Quantidade:quantidade,
+      Unidade:"pc",
+      DataEntrega:dataEntrega,
+      MaterialCadastroStatus:"",
+      AlertaMaterial:"",
+      _importar:true,
+      _urgente:urgente,
+      _materialCadastroID:"",
+      _manual:true
+    };
+
+    if(manualEditingId){
+      const ix=previewItems.findIndex(item=>String(item.PreviewItemID||"")===String(manualEditingId));
+      if(ix>=0)previewItems[ix]=obj;
+      const mix=manualPreviewItems.findIndex(item=>String(item.PreviewItemID||"")===String(manualEditingId));
+      if(mix>=0)manualPreviewItems[mix]=obj;
+    }else{
+      previewItems.push(obj);
+      manualPreviewItems.push(obj);
+    }
+
+    pdfIgnoredItems.delete(itemCliente);
+    pdfSequenceConfirmedAbsent.delete(itemCliente);
+    closeManualItemModal();
+    renderSequenceAlarm();
+    renderCoverageAlarm();
+    renderPreviewRows();
+    updatePreviewSummary();
+  }catch(error){
+    document.getElementById("manualItemError").textContent=error.message||String(error);
   }
 }
 
@@ -422,9 +991,12 @@ function renderImportPreview(data){
   const pedido=data.pedido||{};
   document.getElementById("prevOrder").textContent=pedido.OrdemCorte||"-";
   document.getElementById("prevPo").textContent=pedido.NumeroPO||"-";
-  document.getElementById("prevPdfItems").textContent=data.totalItens||previewItems.length;
+  document.getElementById("prevPdfItems").textContent=(data.totalItensDeclaradosPdf||pdfDeclaredItems.length||data.totalItens||previewItems.length);
   document.getElementById("prevPdfPieces").textContent=data.totalPecas||previewItems.reduce((s,i)=>s+Number(i.Quantidade||0),0);
 
+  renderRepeatedPoWarning();
+  renderSequenceAlarm();
+  renderCoverageAlarm();
   showPreviewMaterialAlarm(previewItems);
   renderPreviewRows();
   updatePreviewSummary();
@@ -501,6 +1073,11 @@ function renderPreviewRows(){
         <select class="material-choice" onchange="changePreviewMaterial('${escapeHtml(item.PreviewItemID)}',this.value)" ${selected?"":"disabled"}>
           ${options}
         </select>
+      </td>
+      <td>
+        ${item._manual
+          ? `<button class="btn-light" onclick="openManualItemModal('${escapeHtml(item.ItemCliente)}')">Edit</button><div class="source-manual">MANUAL</div>`
+          : `<span style="color:#64748b">Auto</span>`}
       </td>
     `;
 
@@ -583,6 +1160,9 @@ function getPreviewSummary(){
 
 function updatePreviewSummary(){
   const summary=getPreviewSummary();
+  renderRepeatedPoWarning();
+  renderSequenceAlarm();
+  renderCoverageAlarm();
   showPreviewMaterialAlarm(previewItems);
   document.getElementById("prevSelectedItems").textContent=summary.selected.length;
   document.getElementById("prevSelectedPieces").textContent=summary.pieces;
@@ -599,13 +1179,46 @@ function updatePreviewSummary(){
     summary.warnings.length+" warning(s) kept"
   ];
   document.getElementById("previewDecisionText").textContent=parts.join(" • ");
+
+  const confirmBtn=document.getElementById("confirmImportButton");
+  if(confirmBtn){
+    const unresolvedSequence=getUnresolvedSequenceSuspects();
+    confirmBtn.disabled=!!repeatedPoPreview || !!importacaoEmCurso || unresolvedSequence.length>0;
+    confirmBtn.title=repeatedPoPreview
+      ? "Esta PO já foi importada. Preview disponível apenas para teste/conferência."
+      : (unresolvedSequence.length
+          ? "Resolva as possíveis lacunas de sequência antes de confirmar."
+          : "");
+  }
 }
 
 async function confirmCurrentPreview(){
+  if(importacaoEmCurso)return;
+
+  if(repeatedPoPreview){
+    setMessage("PO repetida: modo somente visualização. Esta PO não pode ser importada novamente.","error");
+    return;
+  }
+
+  let requestID="";
+  let previewID="";
+  let completed=false;
+
   try{
     if(!currentPreview||!currentPreview.previewId)throw new Error("No active preview.");
 
     const summary=getPreviewSummary();
+    const unresolvedCoverage=getUnresolvedPdfItems();
+    if(unresolvedCoverage.length)throw new Error("PDF coverage incomplete. Resolve or ignore item(s): "+unresolvedCoverage.join(", "));
+
+    const unresolvedSequence=getUnresolvedSequenceSuspects();
+    if(unresolvedSequence.length){
+      throw new Error(
+        "Possible sequence gap(s) still unresolved: "+unresolvedSequence.join(", ")+
+        ". Add the item manually or confirm that it does not exist."
+      );
+    }
+
     if(!summary.selected.length)throw new Error("Select at least one item to import.");
 
     const warnings=[];
@@ -613,11 +1226,20 @@ async function confirmCurrentPreview(){
     if(summary.warnings.length)warnings.push(summary.warnings.length+" material warning(s) will remain");
 
     if(warnings.length){
-      const proceed=confirm("Please confirm:\n\n- "+warnings.join("\n- ")+"\n\nContinue with the import?");
+      const proceed=confirm("Please confirm:\\n\\n- "+warnings.join("\\n- ")+"\\n\\nContinue with the import?");
       if(!proceed)return;
     }
 
+    previewID=currentPreview.previewId;
+    requestID=String(currentPreview.importacaoRequestID||"").trim();
+
+    if(!requestID){
+      throw new Error("The preview does not contain ImportacaoRequestID. Read the PDF again using backend v54.");
+    }
+
     setMessage("Confirming import...","");
+    setImportUiBusy(true,"A PO está sendo gravada no sistema.");
+    updateImportOverlayNote("A validar e gravar o pedido e os itens...");
 
     const decisoes=previewItems.map(item=>({
       PreviewItemID:item.PreviewItemID,
@@ -626,36 +1248,73 @@ async function confirmCurrentPreview(){
       materialCadastroID:item._materialCadastroID||""
     }));
 
-    const data=await apiPost({
-      action:"confirmarImportacaoPedidoCdmPdf",
-      previewId:currentPreview.previewId,
-      userEmail:document.getElementById("userEmail").value.trim(),
-      decisoes
-    });
+    let data;
 
-    if(!data.ok)throw new Error(data.message||"Import confirmation error.");
+    try{
+      data=await apiPost({
+        action:"confirmarImportacaoPedidoCdmPdf",
+        previewId:previewID,
+        importacaoRequestID:requestID,
+        userEmail:document.getElementById("userEmail").value.trim(),
+        decisoes,
+        itensManuais:manualPreviewItems.filter(item=>item._importar!==false).map(item=>({
+          PreviewItemID:item.PreviewItemID,
+          ItemCliente:item.ItemCliente,
+          CodigoMaterial:item.CodigoMaterialReferencia||item.CodigoCliente,
+          Espessura:item.Espessura,
+          Largura:item.Largura,
+          Comprimento:item.Comprimento,
+          Quantidade:item.Quantidade,
+          DataEntrega:item.DataEntrega||"",
+          Urgente:!!item._urgente
+        })),
+        itensIgnoradosPdf:Array.from(pdfIgnoredItems),
+        itensSequenciaConfirmadosAusentes:Array.from(pdfSequenceConfirmedAbsent)
+      },120000);
+    }catch(error){
+      updateImportOverlayNote("A resposta demorou. A verificar se a PO já foi gravada...");
+      const recovered=await recoverImportResult(requestID,previewID,120000);
 
-    setMessage(
-      data.totalAlertasMaterial
-        ? "PO imported with "+data.totalAlertasMaterial+" warning(s)."
-        : "PO imported successfully after review.",
-      data.totalAlertasMaterial?"warning":"ok"
-    );
+      if(!recovered)throw error;
+      data=recovered;
+    }
 
-    document.getElementById("previewSection").classList.add("hidden");
-    renderImportedOrder(data.pedido,data.itens||[],data.alertasMateriais||[]);
-    currentPreview=null;
-    previewMaterials=[];
-    previewItems=[];
-    document.getElementById("pdfFile").value="";
-    loadRecentOrders();
+    if(!data || data.ok===false){
+      throw new Error(data&&data.message?data.message:"Import confirmation error.");
+    }
+
+    if(data.processing && !data.completed){
+      updateImportOverlayNote("A importação já está em processamento. A aguardar confirmação...");
+      const recovered=await recoverImportResult(requestID,previewID,150000);
+
+      if(!recovered){
+        throw new Error(
+          "The import is still processing. Do not click again. " +
+          "Wait a little and reload the recent orders list."
+        );
+      }
+
+      data=recovered;
+    }
+
+    if(!data.completed && !data.pedido){
+      throw new Error(data.message||"The server did not confirm the import.");
+    }
+
+    completed=true;
+    finishImportSuccess(data);
 
   }catch(error){
+    setImportUiBusy(false);
     setMessage("Error: "+error.message,"error");
+  }finally{
+    if(!completed)setImportUiBusy(false);
   }
 }
 
 async function cancelCurrentPreview(silent){
+  if(importacaoEmCurso)return;
+
   try{
     if(!currentPreview||!currentPreview.previewId){
       resetPreviewUi();
@@ -681,9 +1340,18 @@ async function cancelCurrentPreview(silent){
 }
 
 function resetPreviewUi(){
+  setImportUiBusy(false);
   currentPreview=null;
   previewMaterials=[];
   previewItems=[];
+  pdfDeclaredItems=[];
+  pdfSequenceWarnings=[];
+  pdfSequenceSuspects=[];
+  pdfSequenceConfirmedAbsent=new Set();
+  pdfIgnoredItems=new Set();
+  manualPreviewItems=[];
+  manualEditingId="";
+  repeatedPoPreview=false;
   document.getElementById("previewSection").classList.add("hidden");
   document.getElementById("previewItemsBody").innerHTML="";
 }
